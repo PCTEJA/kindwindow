@@ -53,8 +53,11 @@ data.zip
 *.parquet
 *.feather
 *.arrow
-data/
+data/*
 !data/.gitkeep
+!data/manifests/
+data/manifests/*
+!data/manifests/cohort.csv
 !tests/fixtures/
 KINDWINDOW_DATA/
 
