@@ -1,9 +1,9 @@
 """Minimal KindWindow CLI.
 
 PR 01 implements only ``doctor``. Step 06 adds a real ``notes-parse``
-command; all other commands in the README acceptance contract are stubs
-that exit nonzero with a not-implemented message, so a caller can never
-mistake a stub for a real run.
+command and Step 07 adds a real ``demo`` command; all other commands in
+the README acceptance contract are stubs that exit nonzero with a
+not-implemented message, so a caller can never mistake a stub for a real run.
 """
 
 from __future__ import annotations
@@ -25,7 +25,6 @@ _FUTURE_COMMANDS = (
     "benchmark",
     "parity",
     "notes-eval",
-    "demo",
     "report",
 )
 
@@ -85,6 +84,35 @@ def cmd_doctor(_args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_demo(args: argparse.Namespace) -> int:
+    """Serve the local resident demo app on loopback only (synthetic only)."""
+    if not args.synthetic:
+        print(
+            "kindwindow demo: --synthetic is required (only synthetic demo identities)",
+            file=sys.stderr,
+        )
+        return 2
+    if args.host not in ("127.0.0.1", "::1"):
+        print(
+            f"kindwindow demo: host must be loopback (127.0.0.1 or ::1), got {args.host}",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        import uvicorn
+
+        from kindwindow.app import create_app
+    except ImportError as exc:  # pragma: no cover - missing runtime dep
+        print(f"kindwindow demo: cannot start server: {exc}", file=sys.stderr)
+        return 2
+    db_path = Path(args.db) if args.db else _repo_root() / "local" / "demo.db"
+    app = create_app(db_path)
+    print(f"KindWindow local demo (synthetic only) at http://{args.host}:{args.port}")
+    print(f"Demo database: {db_path}")
+    uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+    return 0
+
+
 def cmd_not_implemented(name: str) -> int:
     print(f"kindwindow {name}: not implemented in PR 01 (see README CLI contract)", file=sys.stderr)
     return 2
@@ -98,6 +126,19 @@ def build_parser() -> argparse.ArgumentParser:
         "notes-parse", help="Parse one free-text note to JSON preference fields"
     )
     notes_parse.add_argument("--text", required=True, help="Free-text note to parse")
+    demo = sub.add_parser("demo", help="Serve the local resident demo app (synthetic only)")
+    demo.add_argument(
+        "--synthetic",
+        action="store_true",
+        help="Required: use synthetic demo identities only",
+    )
+    demo.add_argument(
+        "--host", default="127.0.0.1", help="Loopback host only (127.0.0.1 or ::1)"
+    )
+    demo.add_argument("--port", type=int, default=8000, help="Port (default 8000)")
+    demo.add_argument(
+        "--db", default=None, help="SQLite demo database path (default <repo>/local/demo.db)"
+    )
     for name in _FUTURE_COMMANDS:
         sub.add_parser(name, help=f"(not implemented in PR 01) {name}")
     return parser
@@ -110,6 +151,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_doctor(args)
     if args.command == "notes-parse":
         return cmd_notes_parse(args)
+    if args.command == "demo":
+        return cmd_demo(args)
     return cmd_not_implemented(args.command)
 
 

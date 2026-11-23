@@ -28,6 +28,7 @@ spark = [
 dev = [
     "pytest==8.3.5",
     "ruff==0.9.10",
+    "httpx==0.28.1",
 ]
 
 [dependency-groups]
@@ -37,6 +38,7 @@ spark = [
 dev = [
     "pytest==8.3.5",
     "ruff==0.9.10",
+    "httpx==0.28.1",
 ]
 
 [project.scripts]
