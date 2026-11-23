@@ -539,6 +539,12 @@ def run_pipeline_from_normalized(normalized_dir: Path, output_dir: Path) -> Pipe
 
     Raises :class:`RealDataUnavailableError` when the directory is missing
     or holds no Parquet files. Never falls back to fixtures.
+
+    Memory note (Step 08): this path materializes every event as a
+    dataclass, so it is memory-bound at cohort scale (78M events OOMs
+    this VM). Cohort-scale windows must use the vectorized
+    ``kindwindow.features`` path; this function stays for small
+    normalized inputs and the CLI ``--normalized-dir`` test case.
     """
     normalized_dir = Path(normalized_dir)
     files = sorted(normalized_dir.rglob("*.parquet")) if normalized_dir.is_dir() else []

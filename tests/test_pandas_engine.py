@@ -549,8 +549,15 @@ def test_cli_pipeline_fixture_and_real_workload(capsys, tmp_path):
     assert (out / "windows" / "home=fixture-A" / "year_month=2030-02" / "windows.parquet").is_file()
     assert "ledger_reconciles: True" in capsys.readouterr().out
     # Real workload with no real normalized data: clean error, no fixture fallback.
+    # Point at an explicitly empty dir: the repo's local/normalized now holds
+    # real cohort data (Step 08), and the dataclass path in
+    # run_pipeline_from_normalized is memory-bound at cohort scale, so the
+    # "no data" case must not read it. Use `kindwindow features` for real runs.
     real_out = tmp_path / "real-out"
+    empty_normalized = tmp_path / "empty-normalized"
+    empty_normalized.mkdir()
     code = cli_main(["pipeline", "--engine", "pandas", "--workload", "real",
+                     "--normalized-dir", str(empty_normalized),
                      "--out", str(real_out)])
     assert code == 2
     captured = capsys.readouterr()

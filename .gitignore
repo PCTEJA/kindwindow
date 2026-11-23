@@ -58,6 +58,7 @@ data/*
 !data/manifests/
 data/manifests/*
 !data/manifests/cohort.csv
+!data/manifests/split.csv
 !tests/fixtures/
 KINDWINDOW_DATA/
 
