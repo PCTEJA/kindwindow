@@ -1,8 +1,9 @@
 """Minimal KindWindow CLI.
 
 PR 01 implements only ``doctor``. Step 06 adds a real ``notes-parse``
-command and Step 07 adds a real ``demo`` command; all other commands in
-the README acceptance contract are stubs that exit nonzero with a
+command, Step 07 adds a real ``demo`` command, and Step 04 adds a real
+``pipeline`` command (pandas engine, fixture workload); all other commands
+in the README acceptance contract are stubs that exit nonzero with a
 not-implemented message, so a caller can never mistake a stub for a real run.
 """
 
@@ -17,7 +18,6 @@ from pathlib import Path
 _FUTURE_COMMANDS = (
     "audit",
     "cohort",
-    "pipeline",
     "train",
     "freeze",
     "evaluate",
@@ -113,6 +113,53 @@ def cmd_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_pipeline(args: argparse.Namespace) -> int:
+    """Run the pandas pipeline on fixtures, or refuse a real run with no data."""
+    from kindwindow.engines.pandas_engine import (
+        RealDataUnavailableError,
+        run_pipeline,
+        run_pipeline_from_normalized,
+    )
+
+    root = _repo_root()
+    if args.engine == "spark":
+        print("kindwindow pipeline: --engine spark is not implemented yet", file=sys.stderr)
+        return 2
+    if args.workload == "real":
+        normalized_dir = root / "local" / "normalized"
+        out = Path(args.out) if args.out else root / "local" / "features" / "pipeline-real"
+        try:
+            result = run_pipeline_from_normalized(normalized_dir, out)
+        except RealDataUnavailableError as exc:
+            print(f"kindwindow pipeline: {exc}", file=sys.stderr)
+            return 2
+        except (ValueError, OSError) as exc:
+            print(f"kindwindow pipeline: real workload failed: {exc}", file=sys.stderr)
+            return 1
+    else:
+        input_path = Path(args.input) if args.input else _fixture_paths()["golden_events"]
+        out = Path(args.out) if args.out else root / "local" / "features" / "pipeline-fixture"
+        if not input_path.is_file():
+            print(f"kindwindow pipeline: fixture input not found: {input_path}", file=sys.stderr)
+            return 2
+        try:
+            result = run_pipeline(input_path, out, timezone_name=args.timezone)
+        except (ValueError, OSError) as exc:
+            print(f"kindwindow pipeline: fixture workload failed: {exc}", file=sys.stderr)
+            return 1
+    summary = result.summary()
+    print(f"kindwindow pipeline: {args.engine}/{args.workload} -> {result.output_dir}")
+    for key in ("total_lines", "accepted_first", "quarantined_first", "replays", "ignored"):
+        print(f"  {key}: {summary[key]}")
+    print(f"  ledger_reconciles: {summary['ledger_reconciles']}")
+    print(f"  n_events: {summary['n_events']}  n_windows: {summary['n_windows']}")
+    print(
+        f"  n_excluded_windows: {summary['n_excluded_windows']}  "
+        f"n_discarded_duplicate_windows: {summary['n_discarded_duplicate_windows']}"
+    )
+    return 0
+
+
 def cmd_not_implemented(name: str) -> int:
     print(f"kindwindow {name}: not implemented in PR 01 (see README CLI contract)", file=sys.stderr)
     return 2
@@ -139,6 +186,20 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument(
         "--db", default=None, help="SQLite demo database path (default <repo>/local/demo.db)"
     )
+    pipe = sub.add_parser("pipeline", help="Run the validate -> Parquet -> forecast-keys pipeline")
+    pipe.add_argument("--engine", choices=["pandas", "spark"], default="pandas")
+    pipe.add_argument("--workload", choices=["fixture", "real"], default="fixture")
+    pipe.add_argument(
+        "--input", default=None, help="JSONL input (fixture workload; default: golden fixture)"
+    )
+    pipe.add_argument(
+        "--out", default=None, help="Output directory (default: local/features/pipeline-<workload>)"
+    )
+    pipe.add_argument(
+        "--timezone",
+        default=None,
+        help="IANA timezone for wall-clock validation, e.g. America/Chicago",
+    )
     for name in _FUTURE_COMMANDS:
         sub.add_parser(name, help=f"(not implemented in PR 01) {name}")
     return parser
@@ -153,6 +214,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_notes_parse(args)
     if args.command == "demo":
         return cmd_demo(args)
+    if args.command == "pipeline":
+        return cmd_pipeline(args)
     return cmd_not_implemented(args.command)
 
 

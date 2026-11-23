@@ -1,0 +1,7 @@
+{"home":"fixture-X","member":"adverse.jsonl","row":1,"time":"2030-04-01T08:00:00","sensor":"M1","type":"motion","message":"ON"}
+{"home":"fixture-X","member":"adverse.jsonl","row":2,"time":"2030-04-01T10:00:00","sensor":"M1","type":"motion","message":"OFF"}
+{"home":"fixture-X","member":"adverse.jsonl","row":3,"time":"2030-04-01T10:15:00","sensor":"M9","type":"motion","message":"UNKNOWN"}
+{"home":"fixture-X","member":"adverse.jsonl","row":4,"time":"2030-04-01T10:30:00","sensor":"M1","type":"motion","message":"ON"}
+{"home":"fixture-X","member":"adverse.jsonl","row":5,"time":"2030-04-01T11:00:00","sensor":"M1","type":"motion","message":"OFF"}
+{"home":"fixture-X","member":"adverse.jsonl","row":6,"time":"2030-04-01T11:30:00","sensor":"D1","type":"door","message":"OPEN"}
+{"home":"fixture-X","member":"adverse.jsonl","row":7,"time":"2030-04-01T12:00:00","sensor":"M1","type":"motion","message":"OFF"}
