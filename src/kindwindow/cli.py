@@ -18,7 +18,6 @@ from pathlib import Path
 _FUTURE_COMMANDS = (
     "audit",
     "cohort",
-    "evaluate",
     "generate",
     "benchmark",
     "parity",
@@ -534,6 +533,58 @@ def cmd_freeze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_evaluate(_args: argparse.Namespace) -> int:
+    """Evaluate the frozen model on the TEST split, exactly once.
+
+    Reduced Step 11 scope: RQ1/RQ3 test scores, gap 12 h, degradation
+    30% events gone (seed 2207), abstention 50%/100%. Requires the
+    freeze manifest (local/runs/step11/manifest.json) written before
+    any test row is read; refuses when the frozen artifact changed
+    since the manifest was written. Never refits, tunes, or commits.
+    """
+    from kindwindow.evaluation import run_evaluation
+
+    root = _repo_root()
+    try:
+        summary = run_evaluation(root)
+    except FileNotFoundError as exc:
+        print(f"kindwindow evaluate: {exc}", file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        print(f"kindwindow evaluate: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"kindwindow evaluate: test n={summary['n_test']} "
+        f"frozen calibrated macro Brier={summary['frozen_calibrated_macro_brier']:.6f} "
+        f"recency macro Brier={summary['recency_baseline_macro_brier']:.6f} "
+        f"improvement={summary['paired_improvement_macro_brier']:.6f}"
+    )
+    for target, gate in summary["abstention"].items():
+        print(
+            f"  abstention {target}: retained={gate['n_retained']}/{gate['n_eligible']} "
+            f"macro Brier={gate['macro_brier_retained']:.6f}"
+        )
+    gap = summary["gap_12h"]
+    if gap.get("omitted"):
+        print(f"  gap 12h: OMITTED ({gap.get('reason')})")
+    else:
+        print(
+            f"  gap 12h: flagged={gap['n_flagged']} kept={gap['n_kept']} "
+            f"macro Brier (excl. flagged)={gap['macro_brier_excluding_flagged']:.6f}"
+        )
+    deg = summary["degradation_30pct_seed_2207"]
+    if deg.get("omitted"):
+        print(f"  degradation 30%/2207: OMITTED ({deg.get('reason')})")
+    else:
+        print(
+            f"  degradation 30%/2207: n_scored={deg['n_scored']} "
+            f"missing_keys={deg['n_missing_keys']} "
+            f"macro Brier={deg['macro_brier']:.6f}"
+        )
+    print("kindwindow evaluate: -> reports/tables/test_scores.csv")
+    return 0
+
+
 def cmd_not_implemented(name: str) -> int:
     print(f"kindwindow {name}: not implemented in PR 01 (see README CLI contract)", file=sys.stderr)
     return 2
@@ -640,6 +691,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--eval-split", default="selection",
         help="Split reference (selection; test is refused)",
     )
+    sub.add_parser(
+        "evaluate",
+        help="Score the frozen model on TEST once (reduced Step 11 scope)",
+    )
     return parser
 
 
@@ -664,6 +719,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_train(args)
     if args.command == "freeze":
         return cmd_freeze(args)
+    if args.command == "evaluate":
+        return cmd_evaluate(args)
     return cmd_not_implemented(args.command)
 
 
