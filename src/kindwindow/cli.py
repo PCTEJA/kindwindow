@@ -18,8 +18,6 @@ from pathlib import Path
 _FUTURE_COMMANDS = (
     "audit",
     "cohort",
-    "train",
-    "freeze",
     "evaluate",
     "generate",
     "benchmark",
@@ -460,6 +458,82 @@ def cmd_baselines(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_train(args: argparse.Namespace) -> int:
+    """Fit the 7 candidates on TRAIN; score on SELECTION only.
+
+    Refuses when the eval split is test, when inputs are missing, or
+    when split.csv fails its hash check. Test is sealed.
+    """
+    if getattr(args, "eval_split", "selection") == "test":
+        print(
+            "kindwindow train: --eval-split test is refused (test is sealed)",
+            file=sys.stderr,
+        )
+        return 2
+    from kindwindow.models.train import run_train
+
+    root = _repo_root()
+    try:
+        result = run_train(
+            root,
+            features_dir=getattr(args, "features", None),
+            split_path=getattr(args, "split", None),
+        )
+    except FileNotFoundError as exc:
+        print(f"kindwindow train: {exc}", file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        print(f"kindwindow train: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"kindwindow train: winner={result['winner']['name']} "
+        f"selection macro Brier={result['winner']['loss']:.4f} "
+        f"(n_train={result['n_train']}, n_selection={result['n_selection']})"
+    )
+    for name, secs in result["fit_timings_seconds"].items():
+        print(f"  fit {name}: {secs:.1f}s")
+    print(f"kindwindow train: -> {result['selection_scores_csv']}")
+    return 0
+
+
+def cmd_freeze(args: argparse.Namespace) -> int:
+    """Freeze the train winner + calibration + retention gates.
+
+    Refuses when test is requested, when train has not run, or when
+    split.csv fails its hash check. Test is sealed.
+    """
+    if getattr(args, "eval_split", "selection") == "test":
+        print(
+            "kindwindow freeze: --eval-split test is refused (test is sealed)",
+            file=sys.stderr,
+        )
+        return 2
+    from kindwindow.models.freeze import run_freeze
+
+    root = _repo_root()
+    try:
+        result = run_freeze(
+            root,
+            features_dir=getattr(args, "features", None),
+            split_path=getattr(args, "split", None),
+        )
+    except FileNotFoundError as exc:
+        print(f"kindwindow freeze: {exc}", file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        print(f"kindwindow freeze: {exc}", file=sys.stderr)
+        return 1
+    cal = result["calibration"]
+    print(
+        f"kindwindow freeze: winner={result['winner']['name']} "
+        f"calibration={'fitted' if cal['fitted'] else 'identity'} "
+        f"(pos={cal['n_positive']}, neg={cal['n_negative']})"
+    )
+    print(f"kindwindow freeze: -> {result['frozen_model_path']}")
+    print(f"kindwindow freeze: receipt -> {result['freeze_receipt']}")
+    return 0
+
+
 def cmd_not_implemented(name: str) -> int:
     print(f"kindwindow {name}: not implemented in PR 01 (see README CLI contract)", file=sys.stderr)
     return 2
@@ -548,6 +622,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     baselines.add_argument("--features", default=None, help="Windows Parquet dir")
     baselines.add_argument("--split", default=None, help="split.csv path")
+    train_p = sub.add_parser(
+        "train", help="Fit the 7 candidates on TRAIN; score on SELECTION only"
+    )
+    train_p.add_argument("--features", default=None, help="Windows Parquet dir")
+    train_p.add_argument("--split", default=None, help="split.csv path")
+    train_p.add_argument(
+        "--eval-split", default="selection",
+        help="Split to score on (selection; test is refused)",
+    )
+    freeze_p = sub.add_parser(
+        "freeze", help="Freeze winner + calibration + retention gates"
+    )
+    freeze_p.add_argument("--features", default=None, help="Windows Parquet dir")
+    freeze_p.add_argument("--split", default=None, help="split.csv path")
+    freeze_p.add_argument(
+        "--eval-split", default="selection",
+        help="Split reference (selection; test is refused)",
+    )
     return parser
 
 
@@ -568,6 +660,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_features(args)
     if args.command == "baselines":
         return cmd_baselines(args)
+    if args.command == "train":
+        return cmd_train(args)
+    if args.command == "freeze":
+        return cmd_freeze(args)
     return cmd_not_implemented(args.command)
 
 
