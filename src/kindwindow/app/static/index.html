@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KindWindow — local demo</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">K</span>
+    <div>
+      <h1>KindWindow</h1>
+      <p class="tagline">A calm way to arrange a visit, on your terms.</p>
+    </div>
+  </div>
+  <p class="demo-label" role="note">Local demo — synthetic identities only. No real people are contacted.</p>
+</header>
+
+<nav class="views" aria-label="Views">
+  <button type="button" class="view-tab is-active" data-view="resident" aria-current="page">Resident</button>
+  <button type="button" class="view-tab" data-view="contact">Contact</button>
+  <button type="button" class="view-tab" data-view="research">Research</button>
+</nav>
+
+<main id="main">
+  <div id="alert" class="alert" role="alert" hidden></div>
+
+  <!-- ============================ RESIDENT ============================ -->
+  <section id="view-resident" class="view" aria-labelledby="resident-heading">
+    <h2 id="resident-heading">Resident</h2>
+    <p class="lede">You decide when visits can happen, who may visit, and when everything stops. Nothing is shared with a contact until you approve it.</p>
+
+    <div id="resident-login" class="card">
+      <h3>Log in</h3>
+      <p>This demo has one synthetic resident. Logging in stays on this computer only.</p>
+      <button type="button" class="btn primary" id="btn-login-resident">Log in as resident</button>
+      <p class="hint" id="resident-login-hint"></p>
+    </div>
+
+    <div id="resident-app" hidden>
+      <p class="status-line"><span id="resident-status">Signed in as resident.</span>
+        <button type="button" class="btn link" id="btn-logout-resident">Log out</button></p>
+
+      <div class="prob card">
+        <h3>Forecast for the next 30 minutes</h3>
+        <p class="prob-value"><strong>0.42</strong> <span>chance of a sensor event in the next 30 minutes</span></p>
+        <p class="fine">Synthetic demo value — shown only to the resident. It is never sent to contacts, and approving a visit does not depend on it.</p>
+      </div>
+
+      <section class="card" aria-labelledby="prefs-heading">
+        <h3 id="prefs-heading">Your visiting hours</h3>
+        <p class="fine">Times are local HH:MM; this demo treats local time as UTC. A range that ends earlier than it starts runs overnight into the next day.</p>
+        <div id="prefs-current" class="current-box" aria-live="polite"></div>
+
+        <form id="prefs-form">
+          <fieldset>
+            <legend>Preferred days</legend>
+            <div class="day-toggles" id="day-toggles">
+              <label><input type="checkbox" value="1"> Mon</label>
+              <label><input type="checkbox" value="2"> Tue</label>
+              <label><input type="checkbox" value="3"> Wed</label>
+              <label><input type="checkbox" value="4"> Thu</label>
+              <label><input type="checkbox" value="5"> Fri</label>
+              <label><input type="checkbox" value="6"> Sat</label>
+              <label><input type="checkbox" value="7"> Sun</label>
+            </div>
+          </fieldset>
+          <div class="field-row">
+            <label>Preferred from <input type="time" id="pref-start" required></label>
+            <label>to <input type="time" id="pref-end" required></label>
+          </div>
+          <div class="field-row">
+            <label>Quiet from <input type="time" id="quiet-start"></label>
+            <label>to <input type="time" id="quiet-end"></label>
+            <button type="button" class="btn" id="btn-clear-quiet">Clear quiet hours</button>
+          </div>
+          <p class="fine">Quiet hours are a rest period inside your visiting hours. If quiet hours covered all of your visiting hours, there would be no usable slot, so that is not allowed.</p>
+          <fieldset>
+            <legend>Who may visit</legend>
+            <label class="check"><input type="checkbox" id="grant-a" value="1"> Contact A</label>
+            <label class="check"><input type="checkbox" id="grant-b" value="2"> Contact B</label>
+          </fieldset>
+          <p class="form-msg" id="prefs-msg" aria-live="polite"></p>
+          <button type="submit" class="btn primary">Save visiting hours</button>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="note-heading">
+        <h3 id="note-heading">Write it in words</h3>
+        <p class="fine">Describe your hours in plain language. We will show you exactly what we understood — nothing changes until you confirm it.</p>
+        <label for="note-text">Your note</label>
+        <textarea id="note-text" rows="3" placeholder="Example: Monday: available 09:00-12:00; quiet 10:00-10:30."></textarea>
+        <button type="button" class="btn" id="btn-parse-note">Understand this note</button>
+        <div id="note-result" aria-live="polite"></div>
+        <div id="pending-box" class="pending-box" hidden>
+          <h4>Pending — waiting for your confirmation</h4>
+          <p id="pending-summary"></p>
+          <button type="button" class="btn primary" id="btn-confirm-pending">Confirm — apply these hours</button>
+          <button type="button" class="btn" id="btn-cancel-pending">Cancel — keep my current hours</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="invite-heading">
+        <h3 id="invite-heading">Propose a visit</h3>
+        <form id="invite-form">
+          <div class="field-row">
+            <label>Contact
+              <select id="invite-contact">
+                <option value="1">Contact A</option>
+                <option value="2">Contact B</option>
+              </select>
+            </label>
+            <label>Date and time (future slot)
+              <input type="datetime-local" id="invite-slot" required>
+            </label>
+          </div>
+          <p class="fine">The slot must be on a preferred day, inside your preferred hours, and outside quiet hours.</p>
+          <p class="form-msg" id="invite-msg" aria-live="polite"></p>
+          <button type="submit" class="btn primary">Propose visit</button>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="invitations-heading">
+        <h3 id="invitations-heading">Your invitations</h3>
+        <p class="fine" id="invitations-empty">No invitations yet. Propose a visit above to see it here.</p>
+        <ul id="invitations-list" class="inv-list"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="pause-heading">
+        <h3 id="pause-heading">Pause visits</h3>
+        <p>Pausing stops new proposals. It also invalidates invitations you already approved — they go back to pending, and after you resume they need a fresh approval before any contact can see them again. Nothing is revived automatically.</p>
+        <p class="form-msg" id="pause-msg" aria-live="polite"></p>
+        <button type="button" class="btn warn" id="btn-pause">Pause visits</button>
+        <button type="button" class="btn primary" id="btn-resume" hidden>Resume visits</button>
+      </section>
+
+      <section class="card danger-zone" aria-labelledby="delete-heading">
+        <h3 id="delete-heading">Delete demo data</h3>
+        <p>This deletes the synthetic resident, contacts, invitations, preferences and sessions for this demo. It cannot be undone.</p>
+        <button type="button" class="btn danger" id="btn-delete">Delete demo data</button>
+        <div id="delete-confirm" hidden>
+          <p><strong>Are you sure?</strong> This will delete all demo records for this resident.</p>
+          <button type="button" class="btn danger" id="btn-delete-yes">Yes, delete everything</button>
+          <button type="button" class="btn" id="btn-delete-no">No, keep my demo data</button>
+        </div>
+        <p class="form-msg" id="delete-msg" aria-live="polite"></p>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================ CONTACT ============================ -->
+  <section id="view-contact" class="view" hidden aria-labelledby="contact-heading">
+    <h2 id="contact-heading">Contact</h2>
+    <p class="lede">You only see visits that have been approved for you, while they are still open. Nothing else is shared with you.</p>
+    <div class="card">
+      <h3>Log in</h3>
+      <label for="contact-picker">Who are you?</label>
+      <select id="contact-picker">
+        <option value="contact-a">Contact A</option>
+        <option value="contact-b">Contact B</option>
+      </select>
+      <button type="button" class="btn primary" id="btn-login-contact">Log in as this contact</button>
+      <p class="hint" id="contact-login-hint"></p>
+    </div>
+    <div id="contact-app" hidden>
+      <p class="status-line"><span id="contact-status"></span>
+        <button type="button" class="btn link" id="btn-logout-contact">Log out</button></p>
+      <section class="card" aria-labelledby="inbox-heading">
+        <h3 id="inbox-heading">Your invitations</h3>
+        <p class="fine">Contacts see only three things for each invitation: its number, the visit time, and when it expires. You see <strong>no probability, no token, and no internal details</strong>.</p>
+        <p class="fine" id="contact-empty">No invitations for you right now.</p>
+        <ul id="contact-list" class="inv-list"></ul>
+        <button type="button" class="btn" id="btn-refresh-contact">Refresh</button>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================ RESEARCH ============================ -->
+  <section id="view-research" class="view" hidden aria-labelledby="research-heading">
+    <h2 id="research-heading">Research</h2>
+    <p class="lede">Verified aggregates from the KindWindow study — no real sensor rows, synthetic demo only.</p>
+    <p class="fine">Read-only summary. Lower Brier score is better (0 is perfect, 0.25 is guessing at a coin flip). Macro Brier is the average across the 20 homes in the study.</p>
+
+    <section class="card" aria-labelledby="rq1-heading">
+      <h3 id="rq1-heading">Does recent sensor activity improve the 30-minute forecast?</h3>
+      <table class="results">
+        <caption>Frozen model vs baselines on the test set — 206,953 windows, 20 homes, 107,232 events (prevalence 0.518)</caption>
+        <thead><tr><th scope="col">Model</th><th scope="col">Macro Brier</th><th scope="col">Macro AP</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Frozen forest, calibrated (forest-d10-leaf10)</th><td><strong>0.141</strong></td><td>0.806</td></tr>
+          <tr><th scope="row">Frozen forest, uncalibrated</th><td>0.142</td><td>0.806</td></tr>
+          <tr><th scope="row">Recency baseline</th><td>0.185</td><td>0.788</td></tr>
+          <tr><th scope="row">Constant baseline</th><td>0.237</td><td>0.512</td></tr>
+          <tr><th scope="row">Hour-of-week baseline</th><td>0.226</td><td>0.609</td></tr>
+        </tbody>
+      </table>
+      <p>The frozen forest beats the recency baseline by <strong>0.044</strong> (23.6% better), and wins in <strong>19 of 20 homes</strong>. The one exception is hh119 (forest 0.093, recency 0.093 — recency ahead by 0.0003).</p>
+    </section>
+
+    <section class="card" aria-labelledby="abstain-heading">
+      <h3 id="abstain-heading">What does abstaining cost?</h3>
+      <table class="results">
+        <caption>Keeping only the most confident predictions</caption>
+        <thead><tr><th scope="col">Kept</th><th scope="col">Windows kept</th><th scope="col">Macro Brier on kept</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">100% (answer everything)</th><td>206,953</td><td>0.141</td></tr>
+          <tr><th scope="row">50% (most confident half)</th><td>100,812</td><td><strong>0.069</strong></td></tr>
+        </tbody>
+      </table>
+      <p>Answering only the most confident half halves the error — but half of all windows get no answer at all.</p>
+    </section>
+
+    <section class="card" aria-labelledby="robust-heading">
+      <h3 id="robust-heading">How robust is it to gaps and missing data?</h3>
+      <ul class="fact-list">
+        <li><strong>12-hour gaps:</strong> excluding windows after a gap longer than 12 hours (30,447 windows flagged, 176,506 kept) gives macro Brier <strong>0.162</strong>. The flagged windows are mostly easy, quiet periods, so the remaining set is harder.</li>
+        <li><strong>30% of events missing:</strong> with 30% of events dropped (seed 2207, 23,475,783 of 78,275,425 events), macro Brier is <strong>0.143</strong> — only 0.002 worse than the clean 0.141. The model is nearly insensitive to losing a third of its input.</li>
+      </ul>
+    </section>
+
+    <section class="card" aria-labelledby="perhome-heading">
+      <h3 id="perhome-heading">Per-home Brier — frozen forest vs recency baseline</h3>
+      <p class="fine">Values from <code>reports/tables/test_scores.csv</code> (calibrated forest, test split). Lower is better. Bars are scaled to 0.25.</p>
+      <div id="perhome-chart" class="chart" role="img" aria-label="Bar chart of per-home Brier scores for the frozen forest and the recency baseline"></div>
+      <details>
+        <summary>Show the per-home numbers as a table</summary>
+        <table class="results" id="perhome-table">
+          <thead><tr><th scope="col">Home</th><th scope="col">Windows</th><th scope="col">Forest Brier</th><th scope="col">Recency Brier</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </section>
+
+    <section class="card" aria-labelledby="systems-heading">
+      <h3 id="systems-heading">When does local Spark beat pandas?</h3>
+      <p class="fine">Median of 3 timed attempts per workload, one machine, fresh processes. Parity-checked before comparing.</p>
+      <table class="results">
+        <caption>Median run time (seconds)</caption>
+        <thead><tr><th scope="col">Workload</th><th scope="col">pandas</th><th scope="col">Spark</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Synthetic, 1M events</th><td><strong>44.2 s</strong></td><td>60.8 s</td></tr>
+          <tr><th scope="row">Real, 78,275,425 events</th><td><strong>109.8 s</strong></td><td>305.4 s</td></tr>
+          <tr><th scope="row">Synthetic, 10M events</th><td>0 of 3 finished — hit the ~5.8 GB memory cap</td><td>228.1 s (all 3 finished)</td></tr>
+        </tbody>
+      </table>
+      <p>On this machine pandas is faster up to the real workload; Spark only wins when the data no longer fits in memory.</p>
+    </section>
+
+    <section class="card" aria-labelledby="latency-heading">
+      <h3 id="latency-heading">Demo app responsiveness</h3>
+      <p>Live loopback latency, 100 measured calls after 10 warm-ups per endpoint: <strong>p50 1.6–3.3 ms, p95 2.2–4.3 ms</strong> across endpoints. The demo run passed 52 of 52 checks.</p>
+      <p class="fine">Verified aggregates — no real sensor rows, synthetic demo only. Full evidence index: <code>reports/evidence.csv</code> in the repository.</p>
+    </section>
+  </section>
+</main>
+
+<footer>
+  <p>KindWindow — UNT CSCE 5300, Fall 2026. Local demo: synthetic identities only. Times are local HH:MM; this demo treats local time as UTC. A range end earlier than its start means overnight into the next day.</p>
+</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

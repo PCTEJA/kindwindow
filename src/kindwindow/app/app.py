@@ -37,9 +37,12 @@ from pathlib import Path
 from typing import Callable
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from . import store
+
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
+_STATIC_FILES = {"app.js": "text/javascript", "styles.css": "text/css"}
 
 DEMO_LABEL = "Local demo — synthetic identities only. No real people are contacted."
 INVITE_TTL_SECONDS = 3600  # short-lived invite: 1 hour
@@ -257,10 +260,20 @@ def create_app(db_path: str | Path, clock: Callable[[], float] | None = None) ->
             return None, JSONResponse(FORBIDDEN, status_code=403)
         return sess, None
 
-    # -- landing / login -------------------------------------------
+    # -- landing / static UI ---------------------------------------
+    # GET / serves the single-page demo UI (static/index.html + app.js).
+    # LANDING_HTML is retained below as the documented plain-text
+    # description of the routes for reference; the UI is the surface.
     @app.get("/", response_class=HTMLResponse)
-    def index() -> str:
-        return LANDING_HTML
+    def index():
+        return FileResponse(_STATIC_DIR / "index.html", media_type="text/html")
+
+    @app.get("/static/{name}")
+    def static_file(name: str):
+        media_type = _STATIC_FILES.get(name)
+        if media_type is None:
+            return JSONResponse({"detail": "not found"}, status_code=404)
+        return FileResponse(_STATIC_DIR / name, media_type=media_type)
 
     @app.post("/demo/login")
     def login(payload: dict, request: Request):
