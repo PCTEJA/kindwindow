@@ -1,0 +1,11 @@
+sensor_type,message,mapped_meaning,is_positive,counts_for_history,disposition
+motion,ON,motion activation (movement detected),true,true,accepted
+motion,OFF,motion deactivation (sensor reset / no movement),false,true,accepted
+door,OPEN,door opened,true,true,accepted
+door,CLOSE,door closed,true,true,accepted
+motion,OPEN,UNMAPPED - synthetic example only; quarantine,false,false,quarantined
+motion,CLOSE,UNMAPPED - synthetic example only; quarantine,false,false,quarantined
+door,ON,UNMAPPED - synthetic example only; quarantine,false,false,quarantined
+door,OFF,UNMAPPED - synthetic example only; quarantine,false,false,quarantined
+motion,UNKNOWN,UNMAPPED - synthetic example only; quarantine,false,false,quarantined
+door,UNKNOWN,UNMAPPED - synthetic example only; quarantine,false,false,quarantined
