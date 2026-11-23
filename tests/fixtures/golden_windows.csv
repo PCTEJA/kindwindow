@@ -1,0 +1,4 @@
+home,t,count_5m,count_30m,count_120m,door_30m,recency_seconds,y
+fixture-A,2030-02-01T10:00:00,2,3,4,2,1,0
+fixture-A,2030-02-01T10:30:00,0,1,4,0,1800,1
+fixture-A,2030-02-01T11:00:00,0,2,6,1,1800,0

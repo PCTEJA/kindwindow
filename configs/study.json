@@ -1,0 +1,97 @@
+{
+  "protocol": "KindWindow proposed freeze v1",
+  "proposal_fixed": {
+    "max_homes": 20,
+    "target_min_homes": 10,
+    "min_interpretable_days": 90,
+    "half_hour_minutes": 30,
+    "history_minutes": [
+      5,
+      30,
+      120
+    ],
+    "warmup_minutes": 120,
+    "gap_sensitivity_hours": [
+      6,
+      12,
+      24
+    ],
+    "split_proportions": [
+      0.6,
+      0.1,
+      0.1,
+      0.2
+    ],
+    "boundary_purge_hours_each_side": 24,
+    "weekly_rate_pseudocount": 20,
+    "logistic_C": [
+      0.1,
+      1,
+      10
+    ],
+    "forest": {
+      "n_estimators": 200,
+      "max_depth": [
+        5,
+        10
+      ],
+      "min_samples_leaf": [
+        10,
+        50
+      ]
+    },
+    "selection_metric": "mean of per-home Brier",
+    "calibration_min_each_class": 50,
+    "calibration": "sigmoid",
+    "rare_train_class_fraction": 0.05,
+    "event_loss": [
+      0.1,
+      0.3
+    ],
+    "sensor_loss": [
+      0.25
+    ],
+    "stress_replicates": 5,
+    "retention_targets": [
+      0.5,
+      0.75,
+      1
+    ],
+    "systems_synthetic_core": [
+      1000000,
+      10000000
+    ],
+    "systems_optional": 50000000,
+    "attempts_per_engine_per_workload": 3,
+    "cap_seconds": 1800,
+    "cap_memory_fraction": 0.7,
+    "float_atol": 1e-8,
+    "float_rtol": 0,
+    "text_dev": 40,
+    "text_test": 20
+  },
+  "proposed_pretest_choices": {
+    "sort": "casefolded lexical home ID",
+    "interpretable_days": "distinct local dates with interpretable events and span at least 90 inclusive days",
+    "model_seed": 2718,
+    "stress_seeds": [
+      1103,
+      2207,
+      3301,
+      4409,
+      5519
+    ],
+    "random_retention_seed": 6701,
+    "bootstrap_seed": 1709,
+    "bootstrap_draws": 5000,
+    "synthetic_seed": 941,
+    "selection_ties": "prefer simpler then configuration order",
+    "recency_baseline_C": 1,
+    "normalized_train_weights": "N/(H*n_home)",
+    "reliability_bins": "10 equal-width bins in [0,1], rightmost endpoint included",
+    "parquet_codec": "snappy",
+    "memory_sample_seconds": 0.2,
+    "retention_ties": "freeze weighted quantile, fraction of cutoff ties and stable hash tiebreak; 100% passes all",
+    "rare_home_majority": "strictly more than half"
+  }
+}

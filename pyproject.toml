@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kindwindow"
+version = "0.1.0"
+description = "KindWindow: household event prediction and scalable sensor data processing (UNT CSCE 5300)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [
+    { name = "Teja Piepur Chakravarthi", email = "pcteja2000@gmail.com" },
+]
+dependencies = [
+    "pandas==2.2.3",
+    "pyarrow==19.0.1",
+    "numpy==2.2.5",
+    "scikit-learn==1.6.1",
+    "fastapi==0.115.12",
+    "uvicorn==0.34.2",
+]
+
+[project.optional-dependencies]
+spark = [
+    "pyspark==3.5.5",
+]
+dev = [
+    "pytest==8.3.5",
+    "ruff==0.9.10",
+]
+
+[project.scripts]
+kindwindow = "kindwindow.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kindwindow"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

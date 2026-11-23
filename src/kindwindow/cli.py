@@ -1,0 +1,102 @@
+"""Minimal KindWindow CLI.
+
+PR 01 implements only ``doctor``. All other commands in the README
+acceptance contract are stubs that exit nonzero with a not-implemented
+message, so a caller can never mistake a stub for a real run.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+# Commands promised by the README / delivery plan. Only "doctor" is real in PR 01.
+_FUTURE_COMMANDS = (
+    "audit",
+    "cohort",
+    "pipeline",
+    "train",
+    "freeze",
+    "evaluate",
+    "generate",
+    "benchmark",
+    "parity",
+    "notes-eval",
+    "demo",
+    "report",
+)
+
+
+def _repo_root() -> Path:
+    # src/kindwindow/cli.py -> repo root is three levels up.
+    return Path(__file__).resolve().parents[2]
+
+
+def _fixture_paths() -> dict[str, Path]:
+    root = _repo_root()
+    return {
+        "golden_events": root / "tests" / "fixtures" / "golden_events.jsonl",
+        "golden_windows": root / "tests" / "fixtures" / "golden_windows.csv",
+    }
+
+
+def cmd_doctor(_args: argparse.Namespace) -> int:
+    """Print the Python version and check the golden fixture exists."""
+    print(f"Python {sys.version.split()[0]}")
+    print(f"kindwindow: {_repo_root()}")
+    ok = True
+    for name, path in _fixture_paths().items():
+        if path.is_file():
+            if name == "golden_events":
+                n = sum(1 for _ in path.open(encoding="utf-8"))
+                print(f"OK  {name}: {path} ({n} events)")
+            else:
+                print(f"OK  {name}: {path}")
+        else:
+            print(f"MISSING  {name}: {path}")
+            ok = False
+    # Also sanity-check the study config template is valid JSON if present.
+    config = _repo_root() / "configs" / "study.json"
+    if config.is_file():
+        try:
+            json.loads(config.read_text(encoding="utf-8"))
+            print(f"OK  study config: {config} (valid JSON, pre-freeze template)")
+        except json.JSONDecodeError as exc:
+            print(f"BAD  study config: {config}: {exc}")
+            ok = False
+    else:
+        print(f"MISSING  study config: {config}")
+        ok = False
+    if not ok:
+        print("doctor: FAILED — see MISSING/BAD lines above")
+        return 1
+    print("doctor: OK")
+    return 0
+
+
+def cmd_not_implemented(name: str) -> int:
+    print(f"kindwindow {name}: not implemented in PR 01 (see README CLI contract)", file=sys.stderr)
+    return 2
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="kindwindow", description="KindWindow CLI")
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("doctor", help="Print Python version and check the golden fixture exists")
+    for name in _FUTURE_COMMANDS:
+        sub.add_parser(name, help=f"(not implemented in PR 01) {name}")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.command == "doctor":
+        return cmd_doctor(args)
+    return cmd_not_implemented(args.command)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

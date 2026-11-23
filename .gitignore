@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments / uv
+.venv/
+venv/
+ENV/
+env/
+.venv*/
+.uv/
+uv.lock.tmp
+
+# Testing / lint
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
+
+# Local study data — CASAS raw stays local, never in git
+local/
+data.zip
+*.zip
+*.parquet
+*.feather
+*.arrow
+data/
+!data/.gitkeep
+!tests/fixtures/
+KINDWINDOW_DATA/
+
+# Credentials / secrets
+.env
+.env.*
+*.pem
+*.key
+*.token
+credentials/
+secrets/
+.gh-token
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node (if any tooling is added later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated outputs are reviewed before adding in a later PR; do not
+# blanket-ignore reports/slides here, or PR 15 could not add them.
