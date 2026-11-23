@@ -113,18 +113,49 @@ def cmd_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_pipeline_spark(args: argparse.Namespace, root: Path) -> int:
+    """Spark pipeline: JVM readers only, golden fixture; real refuses cleanly."""
+    if args.workload == "real":
+        print(
+            "kindwindow pipeline: --workload real is not available yet — "
+            "no real study data is staged (local/ is empty in this step)",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        from kindwindow.engines.spark_engine import (
+            build_windows,
+            get_spark,
+            load_events,
+            write_windows,
+        )
+    except ImportError as exc:
+        print(f"kindwindow pipeline: Spark engine unavailable: {exc}", file=sys.stderr)
+        return 2
+    output = Path(args.out) if args.out else root / "local" / "features" / "spark-fixture"
+    try:
+        spark = get_spark()
+        windows = build_windows(load_events(spark, _fixture_paths()["golden_events"]))
+        n = windows.count()
+        write_windows(windows, output)
+    except Exception as exc:  # Java gateway / Spark startup failures, etc.
+        print(f"kindwindow pipeline: Spark run failed: {exc}", file=sys.stderr)
+        return 1
+    print(f"pipeline: engine=spark workload=fixture windows={n} output={output}")
+    return 0
+
+
 def cmd_pipeline(args: argparse.Namespace) -> int:
-    """Run the pandas pipeline on fixtures, or refuse a real run with no data."""
+    """Run the pipeline (pandas or Spark) on fixtures, or refuse a real run."""
+    root = _repo_root()
+    if args.engine == "spark":
+        return _cmd_pipeline_spark(args, root)
     from kindwindow.engines.pandas_engine import (
         RealDataUnavailableError,
         run_pipeline,
         run_pipeline_from_normalized,
     )
 
-    root = _repo_root()
-    if args.engine == "spark":
-        print("kindwindow pipeline: --engine spark is not implemented yet", file=sys.stderr)
-        return 2
     if args.workload == "real":
         normalized_dir = root / "local" / "normalized"
         out = Path(args.out) if args.out else root / "local" / "features" / "pipeline-real"
@@ -193,7 +224,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--input", default=None, help="JSONL input (fixture workload; default: golden fixture)"
     )
     pipe.add_argument(
-        "--out", default=None, help="Output directory (default: local/features/pipeline-<workload>)"
+        "--out",
+        "--output",
+        dest="out",
+        default=None,
+        help="Output directory (default: local/features/pipeline-<workload>)",
     )
     pipe.add_argument(
         "--timezone",

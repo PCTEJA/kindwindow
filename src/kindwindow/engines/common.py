@@ -81,6 +81,43 @@ def is_positive(event_type: str, message: str) -> bool:
     }
 
 
+# --- Spark dense-grid constants (Step 05; same contract as above) ---
+# Bucket / window sizes, in seconds.
+BUCKET_SECONDS = 300  # 5-minute dense-grid bucket
+ORIGIN_SECONDS = 1800  # 30-minute scoring origins
+WARMUP_SECONDS = 7200  # 120 minutes of earlier history required
+TARGET_SECONDS = 1800  # 30-minute target [t, t+30m)
+
+# History windows, in buckets of BUCKET_SECONDS: 5m=1, 30m=6, 120m=24.
+HISTORY_BUCKETS = {"count_5m": 1, "count_30m": 6, "count_120m": 24}
+DOOR_BUCKETS = 6  # door_30m over the preceding 6 buckets
+TARGET_BUCKETS = 6  # current + next five 5-minute buckets
+
+OUTPUT_COLUMNS = [
+    "home",
+    "t",
+    "count_5m",
+    "count_30m",
+    "count_120m",
+    "door_30m",
+    "recency_seconds",
+    "y",
+]
+
+PARQUET_CODEC = "snappy"
+PARTITION_COLUMNS = ["home", "year_month"]
+
+
+def is_positive_message(event_type: str, message: str) -> bool:
+    """Alias of is_positive for the Spark engine (label definition)."""
+    return is_positive(event_type, message)
+
+
+def is_door_event(event_type: str) -> bool:
+    """True for door events (both OPEN and CLOSE count for door features)."""
+    return event_type == "door"
+
+
 @dataclass(frozen=True)
 class Event:
     """One accepted, validated event (local wall-clock time)."""

@@ -556,6 +556,12 @@ def test_cli_pipeline_fixture_and_real_workload(capsys, tmp_path):
     captured = capsys.readouterr()
     assert "no real normalized data" in captured.err
     assert not real_out.exists()
-    # Spark engine is honestly not implemented yet.
-    assert cli_main(["pipeline", "--engine", "spark", "--workload", "fixture"]) == 2
-    assert "not implemented" in capsys.readouterr().err
+    # Spark engine is implemented (Step 05): fixture run succeeds, 3 windows.
+    spark_out = tmp_path / "spark-out"
+    assert (
+        cli_main(
+            ["pipeline", "--engine", "spark", "--workload", "fixture", "--output", str(spark_out)]
+        )
+        == 0
+    )
+    assert (spark_out / "home=fixture-A" / "year_month=2030-02").is_dir()
