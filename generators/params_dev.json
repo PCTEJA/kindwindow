@@ -1,0 +1,117 @@
+{
+  "burst": {
+    "gap_seconds": [
+      0,
+      300
+    ],
+    "probability": 0.375
+  },
+  "fitted_from": {
+    "burst_fraction": 0.375,
+    "burst_gap_max_observed_seconds": 299,
+    "burst_gaps_le_600s": 3,
+    "homes": {
+      "fixture-A": 9
+    },
+    "hours": {
+      "08": 1,
+      "09": 3,
+      "10": 3,
+      "11": 2
+    },
+    "interarrival_gaps_seconds": [
+      5400,
+      1500,
+      299,
+      1,
+      1800,
+      0,
+      1800,
+      1800
+    ],
+    "interarrival_mean_seconds": 1575.0,
+    "messages": {
+      "door:CLOSE": 1,
+      "door:OPEN": 2,
+      "motion:OFF": 4,
+      "motion:ON": 2
+    },
+    "n_events": 9,
+    "sensors": {
+      "door": [
+        "D1"
+      ],
+      "motion": [
+        "M1"
+      ]
+    },
+    "types": {
+      "door": 3,
+      "motion": 6
+    }
+  },
+  "homes": [
+    {
+      "home": "fixture-A",
+      "probability": 1.0
+    }
+  ],
+  "hour_weight_floor": 0.005,
+  "hourly_weights": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.1111111111111111,
+    0.3333333333333333,
+    0.3333333333333333,
+    0.2222222222222222,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "interarrival_seconds": {
+    "distribution": "exponential",
+    "mean_seconds": 1575.0
+  },
+  "member": "synthetic.jsonl",
+  "message_probs": {
+    "door": {
+      "CLOSE": 0.3333333333333333,
+      "OPEN": 0.6666666666666666
+    },
+    "motion": {
+      "OFF": 0.6666666666666666,
+      "ON": 0.3333333333333333
+    }
+  },
+  "provenance": "DEV ONLY \u2014 fitted from the golden fixture only (tests/fixtures/golden_events.jsonl: 9 events, 1 home) plus study-config aggregates. NOT fitted from real CASAS data, NOT from test/selection data. The sample is far too small to represent real homes; real train-fit params (from a train-only aggregate summary via generators.synthetic.fit_params_from_summary_csv) will replace this file in Step 12.",
+  "schema": "kindwindow.synthetic-params/v1",
+  "sensors": {
+    "door": [
+      "D1"
+    ],
+    "motion": [
+      "M1"
+    ]
+  },
+  "source_summary": "tests/fixtures/golden_events.jsonl (n=9) + configs/study.json (synthetic_seed 941)",
+  "start": "2030-02-01T08:00:00",
+  "type_probs": {
+    "door": 0.3333333333333333,
+    "motion": 0.6666666666666666
+  }
+}

@@ -1,0 +1,2 @@
+run_id,commit,config_sha256,input_sha256,workload,engine,input_events,attempt,order_index,status,elapsed_seconds,startup_seconds,peak_tree_bytes,output_bytes,events_per_second,cache_conditions,cpu_cap,memory_cap_bytes,parity_status,reason
+EXAMPLE-synthetic-1m-pandas-a1-20300101T000000Z-00,0000000000000000000000000000000000000000,example-config-sha256,example-input-sha256,synthetic-1m,pandas,1000000,1,0,success,12.345,0.123,123456789,1234567,81004.0,page cache not controlled; not claimed cold,4,5555555555,not_run,
