@@ -30,6 +30,15 @@ dev = [
     "ruff==0.9.10",
 ]
 
+[dependency-groups]
+spark = [
+    "pyspark==3.5.5",
+]
+dev = [
+    "pytest==8.3.5",
+    "ruff==0.9.10",
+]
+
 [project.scripts]
 kindwindow = "kindwindow.cli:main"
 
