@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img">
+<rect width="640" height="420" fill="white"/>
+<text x="320" y="24" text-anchor="middle" font-size="15" font-family="sans-serif">RQ2 — median end-to-end runtime (n=3, parity-passing pairs only)</text>
+<line x1="70" y1="356.0" x2="620" y2="356.0" stroke="#dddddd"/>
+<text x="64" y="360.0" text-anchor="end" font-size="11" font-family="sans-serif">0</text>
+<line x1="70" y1="278.0" x2="620" y2="278.0" stroke="#dddddd"/>
+<text x="64" y="282.0" text-anchor="end" font-size="11" font-family="sans-serif">86</text>
+<line x1="70" y1="200.0" x2="620" y2="200.0" stroke="#dddddd"/>
+<text x="64" y="204.0" text-anchor="end" font-size="11" font-family="sans-serif">171</text>
+<line x1="70" y1="122.0" x2="620" y2="122.0" stroke="#dddddd"/>
+<text x="64" y="126.0" text-anchor="end" font-size="11" font-family="sans-serif">257</text>
+<line x1="70" y1="44.0" x2="620" y2="44.0" stroke="#dddddd"/>
+<text x="64" y="48.0" text-anchor="end" font-size="11" font-family="sans-serif">342</text>
+<text x="161.7" y="386" text-anchor="middle" font-size="12" font-family="sans-serif">1M synthetic</text>
+<rect x="97.7" y="315.7" width="64" height="40.3" fill="#1f77b4"/>
+<text x="129.7" y="311.7" text-anchor="middle" font-size="11" font-family="sans-serif">44</text>
+<rect x="161.7" y="300.6" width="64" height="55.4" fill="#d62728"/>
+<text x="193.7" y="296.6" text-anchor="middle" font-size="11" font-family="sans-serif">61</text>
+<text x="345.0" y="386" text-anchor="middle" font-size="12" font-family="sans-serif">Real (78.3M)</text>
+<rect x="281.0" y="255.8" width="64" height="100.2" fill="#1f77b4"/>
+<text x="313.0" y="251.8" text-anchor="middle" font-size="11" font-family="sans-serif">110</text>
+<rect x="345.0" y="77.4" width="64" height="278.6" fill="#d62728"/>
+<text x="377.0" y="73.4" text-anchor="middle" font-size="11" font-family="sans-serif">305</text>
+<text x="528.3" y="386" text-anchor="middle" font-size="12" font-family="sans-serif">10M synthetic</text>
+<text x="496.3" y="350" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#d62728">failed</text>
+<rect x="528.3" y="148.0" width="64" height="208.0" fill="#d62728"/>
+<text x="560.3" y="144.0" text-anchor="middle" font-size="11" font-family="sans-serif">228</text>
+<rect x="470" y="52" width="12" height="12" fill="#1f77b4"/>
+<text x="487" y="62" font-size="12" font-family="sans-serif">pandas</text>
+<rect x="470" y="70" width="12" height="12" fill="#d62728"/>
+<text x="487" y="80" font-size="12" font-family="sans-serif">spark</text>
+<text x="70" y="408" font-size="11" font-family="sans-serif" fill="#555555">Workload (input events)</text>
+<text x="16" y="200.0" font-size="11" font-family="sans-serif" fill="#555555" transform="rotate(-90 16 200.0)">Median runtime (s)</text>
+<text x="70" y="394" font-size="10" font-family="sans-serif" fill="#555555">10M pandas: 0/3, memory_limit — no bar, no ordering claimed at 10M.</text>
+</svg>

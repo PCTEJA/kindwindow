@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img">
+<rect width="640" height="420" fill="white"/>
+<text x="320" y="24" text-anchor="middle" font-size="15" font-family="sans-serif">RQ3 — selective Brier vs coverage (frozen gates, test)</text>
+<line x1="70" y1="356.0" x2="620" y2="356.0" stroke="#dddddd"/>
+<text x="64" y="360.0" text-anchor="end" font-size="11" font-family="sans-serif">0.00</text>
+<line x1="70" y1="278.0" x2="620" y2="278.0" stroke="#dddddd"/>
+<text x="64" y="282.0" text-anchor="end" font-size="11" font-family="sans-serif">0.04</text>
+<line x1="70" y1="200.0" x2="620" y2="200.0" stroke="#dddddd"/>
+<text x="64" y="204.0" text-anchor="end" font-size="11" font-family="sans-serif">0.08</text>
+<line x1="70" y1="122.0" x2="620" y2="122.0" stroke="#dddddd"/>
+<text x="64" y="126.0" text-anchor="end" font-size="11" font-family="sans-serif">0.12</text>
+<line x1="70" y1="44.0" x2="620" y2="44.0" stroke="#dddddd"/>
+<text x="64" y="48.0" text-anchor="end" font-size="11" font-family="sans-serif">0.16</text>
+<text x="70.0" y="386" text-anchor="middle" font-size="11" font-family="sans-serif">0.0</text>
+<text x="180.0" y="386" text-anchor="middle" font-size="11" font-family="sans-serif">0.2</text>
+<text x="290.0" y="386" text-anchor="middle" font-size="11" font-family="sans-serif">0.4</text>
+<text x="400.0" y="386" text-anchor="middle" font-size="11" font-family="sans-serif">0.6</text>
+<text x="510.0" y="386" text-anchor="middle" font-size="11" font-family="sans-serif">0.8</text>
+<text x="620.0" y="386" text-anchor="middle" font-size="11" font-family="sans-serif">1.0</text>
+<circle cx="71.6" cy="197.9" r="6" fill="#1f77b4"/>
+<text x="81.6" y="189.9" font-size="12" font-family="sans-serif">coverage 0.0028, Brier 0.0811</text>
+<circle cx="72.4" cy="132.7" r="6" fill="#1f77b4"/>
+<text x="82.4" y="124.7" font-size="12" font-family="sans-serif">coverage 0.0043, Brier 0.1145</text>
+<circle cx="72.9" cy="269.0" r="6" fill="#1f77b4"/>
+<text x="82.9" y="261.0" font-size="12" font-family="sans-serif">coverage 0.0053, Brier 0.0446</text>
+<circle cx="73.4" cy="72.6" r="6" fill="#1f77b4"/>
+<text x="83.4" y="64.6" font-size="12" font-family="sans-serif">coverage 0.0062, Brier 0.1454</text>
+<circle cx="73.7" cy="250.6" r="6" fill="#1f77b4"/>
+<text x="83.7" y="242.6" font-size="12" font-family="sans-serif">coverage 0.0067, Brier 0.0540</text>
+<circle cx="73.9" cy="244.3" r="6" fill="#1f77b4"/>
+<text x="83.9" y="236.3" font-size="12" font-family="sans-serif">coverage 0.0070, Brier 0.0573</text>
+<circle cx="74.1" cy="238.8" r="6" fill="#1f77b4"/>
+<text x="84.1" y="230.8" font-size="12" font-family="sans-serif">coverage 0.0075, Brier 0.0601</text>
+<circle cx="74.8" cy="272.2" r="6" fill="#1f77b4"/>
+<text x="84.8" y="264.2" font-size="12" font-family="sans-serif">coverage 0.0087, Brier 0.0430</text>
+<circle cx="75.3" cy="-11.0" r="6" fill="#1f77b4"/>
+<text x="85.3" y="-19.0" font-size="12" font-family="sans-serif">coverage 0.0096, Brier 0.1882</text>
+<circle cx="75.5" cy="243.3" r="6" fill="#1f77b4"/>
+<text x="85.5" y="235.3" font-size="12" font-family="sans-serif">coverage 0.0099, Brier 0.0578</text>
+<circle cx="75.5" cy="102.3" r="6" fill="#1f77b4"/>
+<text x="85.5" y="94.3" font-size="12" font-family="sans-serif">coverage 0.0100, Brier 0.1301</text>
+<circle cx="76.8" cy="227.2" r="6" fill="#1f77b4"/>
+<text x="86.8" y="219.2" font-size="12" font-family="sans-serif">coverage 0.0124, Brier 0.0660</text>
+<circle cx="78.7" cy="204.9" r="6" fill="#1f77b4"/>
+<text x="88.7" y="196.9" font-size="12" font-family="sans-serif">coverage 0.0158, Brier 0.0775</text>
+<circle cx="78.7" cy="166.2" r="6" fill="#1f77b4"/>
+<text x="88.7" y="158.2" font-size="12" font-family="sans-serif">coverage 0.0158, Brier 0.0973</text>
+<circle cx="79.4" cy="57.6" r="6" fill="#1f77b4"/>
+<text x="89.4" y="49.6" font-size="12" font-family="sans-serif">coverage 0.0170, Brier 0.1530</text>
+<circle cx="80.2" cy="255.0" r="6" fill="#1f77b4"/>
+<text x="90.2" y="247.0" font-size="12" font-family="sans-serif">coverage 0.0186, Brier 0.0518</text>
+<circle cx="82.9" cy="51.2" r="6" fill="#1f77b4"/>
+<text x="92.9" y="43.2" font-size="12" font-family="sans-serif">coverage 0.0234, Brier 0.1563</text>
+<circle cx="84.0" cy="266.4" r="6" fill="#1f77b4"/>
+<text x="94.0" y="258.4" font-size="12" font-family="sans-serif">coverage 0.0255, Brier 0.0459</text>
+<circle cx="85.2" cy="193.4" r="6" fill="#1f77b4"/>
+<text x="95.2" y="185.4" font-size="12" font-family="sans-serif">coverage 0.0277, Brier 0.0834</text>
+<circle cx="85.5" cy="238.8" r="6" fill="#1f77b4"/>
+<text x="95.5" y="230.8" font-size="12" font-family="sans-serif">coverage 0.0282, Brier 0.0601</text>
+<circle cx="85.9" cy="199.4" r="6" fill="#1f77b4"/>
+<text x="95.9" y="191.4" font-size="12" font-family="sans-serif">coverage 0.0289, Brier 0.0803</text>
+<circle cx="86.1" cy="135.2" r="6" fill="#1f77b4"/>
+<text x="96.1" y="127.2" font-size="12" font-family="sans-serif">coverage 0.0293, Brier 0.1132</text>
+<circle cx="88.1" cy="93.6" r="6" fill="#1f77b4"/>
+<text x="98.1" y="85.6" font-size="12" font-family="sans-serif">coverage 0.0329, Brier 0.1346</text>
+<circle cx="89.4" cy="233.9" r="6" fill="#1f77b4"/>
+<text x="99.4" y="225.9" font-size="12" font-family="sans-serif">coverage 0.0353, Brier 0.0626</text>
+<circle cx="90.6" cy="161.6" r="6" fill="#1f77b4"/>
+<text x="100.6" y="153.6" font-size="12" font-family="sans-serif">coverage 0.0375, Brier 0.0997</text>
+<circle cx="91.0" cy="137.8" r="6" fill="#1f77b4"/>
+<text x="101.0" y="129.8" font-size="12" font-family="sans-serif">coverage 0.0382, Brier 0.1119</text>
+<circle cx="91.3" cy="292.3" r="6" fill="#1f77b4"/>
+<text x="101.3" y="284.3" font-size="12" font-family="sans-serif">coverage 0.0388, Brier 0.0326</text>
+<circle cx="94.8" cy="153.2" r="6" fill="#1f77b4"/>
+<text x="104.8" y="145.2" font-size="12" font-family="sans-serif">coverage 0.0451, Brier 0.1040</text>
+<circle cx="96.3" cy="104.8" r="6" fill="#1f77b4"/>
+<text x="106.3" y="96.8" font-size="12" font-family="sans-serif">coverage 0.0478, Brier 0.1288</text>
+<circle cx="98.2" cy="188.1" r="6" fill="#1f77b4"/>
+<text x="108.2" y="180.1" font-size="12" font-family="sans-serif">coverage 0.0513, Brier 0.0861</text>
+<circle cx="99.8" cy="181.3" r="6" fill="#1f77b4"/>
+<text x="109.8" y="173.3" font-size="12" font-family="sans-serif">coverage 0.0541, Brier 0.0896</text>
+<circle cx="103.0" cy="37.8" r="6" fill="#1f77b4"/>
+<text x="113.0" y="29.8" font-size="12" font-family="sans-serif">coverage 0.0601, Brier 0.1632</text>
+<circle cx="104.4" cy="301.2" r="6" fill="#1f77b4"/>
+<text x="114.4" y="293.2" font-size="12" font-family="sans-serif">coverage 0.0625, Brier 0.0281</text>
+<circle cx="112.4" cy="-17.5" r="6" fill="#1f77b4"/>
+<text x="122.4" y="-25.5" font-size="12" font-family="sans-serif">coverage 0.0770, Brier 0.1915</text>
+<circle cx="119.1" cy="174.3" r="6" fill="#1f77b4"/>
+<text x="129.1" y="166.3" font-size="12" font-family="sans-serif">coverage 0.0893, Brier 0.0932</text>
+<circle cx="123.6" cy="-10.3" r="6" fill="#1f77b4"/>
+<text x="133.6" y="-18.3" font-size="12" font-family="sans-serif">coverage 0.0975, Brier 0.1878</text>
+<circle cx="124.8" cy="-45.1" r="6" fill="#1f77b4"/>
+<text x="134.8" y="-53.1" font-size="12" font-family="sans-serif">coverage 0.0996, Brier 0.2057</text>
+<circle cx="124.9" cy="4.9" r="6" fill="#1f77b4"/>
+<text x="134.9" y="-3.1" font-size="12" font-family="sans-serif">coverage 0.0998, Brier 0.1801</text>
+<circle cx="124.9" cy="44.8" r="6" fill="#1f77b4"/>
+<text x="134.9" y="36.8" font-size="12" font-family="sans-serif">coverage 0.0998, Brier 0.1596</text>
+<circle cx="124.9" cy="4.3" r="6" fill="#1f77b4"/>
+<text x="134.9" y="-3.7" font-size="12" font-family="sans-serif">coverage 0.0998, Brier 0.1804</text>
+<circle cx="337.9" cy="221.3" r="6" fill="#1f77b4"/>
+<text x="347.9" y="213.3" font-size="12" font-family="sans-serif">coverage 0.4871, Brier 0.0691</text>
+<circle cx="620.0" cy="81.1" r="6" fill="#1f77b4"/>
+<text x="630.0" y="73.1" font-size="12" font-family="sans-serif">coverage 1.0000, Brier 0.1410</text>
+<text x="70" y="408" font-size="11" font-family="sans-serif" fill="#555555">Coverage (retained / eligible test windows)</text>
+<text x="16" y="200.0" font-size="11" font-family="sans-serif" fill="#555555" transform="rotate(-90 16 200.0)">Macro Brier on retained (lower is better)</text>
+<text x="70" y="394" font-size="10" font-family="sans-serif" fill="#555555">Only the measured retentions are plotted (50% and 100%); 75% was omitted in the reduced Step 11 scope — no interpolation.</text>
+</svg>
