@@ -106,6 +106,23 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _sha256_tree(path: Path) -> str:
+    """Deterministic hash of a Parquet directory: sorted relative paths + bytes.
+
+    Hashing the whole 1.2 GB tree takes ~10 s and is done once per
+    attempt (outside the timed child); it pins the exact input bytes.
+    """
+    digest = hashlib.sha256()
+    files = sorted(p for p in path.rglob("*") if p.is_file())
+    for f in files:
+        digest.update(str(f.relative_to(path)).encode("utf-8"))
+        digest.update(b"\0")
+        with f.open("rb") as fh:
+            for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+                digest.update(chunk)
+    return digest.hexdigest()
+
+
 def _git_revision(repo_root: Path) -> dict:
     try:
         commit = subprocess.run(
@@ -341,6 +358,14 @@ def _remove_partial_output(output_dir: Path) -> bool:
 
 
 def _count_input_events(path: Path) -> int:
+    """Event count: JSONL lines for a file, Parquet metadata rows for a dir."""
+    if path.is_dir():
+        import pyarrow.parquet as pq
+
+        return sum(
+            pq.ParquetFile(f).metadata.num_rows
+            for f in sorted(path.rglob("*.parquet"))
+        )
     n = 0
     with path.open(encoding="utf-8") as fh:
         for _ in fh:
@@ -366,18 +391,24 @@ def run_attempt(
     worker_extra_args: list[str] | None = None,
     skip_lock: bool = False,
     min_free_bytes: int = 256 * 1024**2,
+    segment_splits: str | Path | None = None,
 ) -> dict:
     """Run ONE timed attempt under the parent monitor; returns the record.
 
     The record is also appended to ``<runs_dir>/attempts.csv`` with a
     JSON sidecar ``<runs_dir>/<run_id>.json``. Non-success attempts have
     their partial output removed before returning.
+
+    ``input_path`` may be a JSONL file (synthetic workloads) or a
+    normalized Parquet directory (real workload); the worker is told
+    via ``--input-kind`` and, for Spark real runs, the segment-splits
+    sidecar via ``--segment-splits``.
     """
     repo_root = Path(repo_root)
     input_path = Path(input_path)
     if engine not in ("pandas", "spark"):
         raise ValueError(f"engine must be 'pandas' or 'spark', got {engine!r}")
-    if not input_path.is_file():
+    if not input_path.exists():
         raise FileNotFoundError(f"input not found: {input_path}")
     runs_dir = Path(runs_dir) if runs_dir is not None else repo_root / "local" / "bench-runs"
     runs_dir.mkdir(parents=True, exist_ok=True)
@@ -407,7 +438,8 @@ def run_attempt(
     )
     environment["memory_cap_bytes"] = cap_bytes
     input_events = _count_input_events(input_path)
-    input_sha256 = _sha256_file(input_path)
+    input_sha256 = _sha256_tree(input_path) if input_path.is_dir() else _sha256_file(input_path)
+    input_kind = "parquet" if input_path.is_dir() else "jsonl"
 
     record: dict = {
         "run_id": run_id,
@@ -432,11 +464,17 @@ def run_attempt(
         "reason": "",
         "started_utc": started.isoformat(),
         "output_dir": str(output_dir),
+        "input_kind": input_kind,
+        "segment_splits": str(segment_splits) if segment_splits is not None else "",
     }
 
     lock = BenchmarkLock(default_lock_path(repo_root)) if not skip_lock else None
     if lock is not None:
         lock.acquire()
+    extra_args = list(worker_extra_args or [])
+    extra_args += ["--input-kind", input_kind]
+    if input_kind == "parquet" and segment_splits is not None:
+        extra_args += ["--segment-splits", str(segment_splits)]
     try:
         record.update(
             _run_child(
@@ -451,7 +489,7 @@ def run_attempt(
                 cap_bytes=cap_bytes,
                 threads=threads,
                 shuffle_partitions=shuffle_partitions,
-                worker_extra_args=worker_extra_args or [],
+                worker_extra_args=extra_args,
                 record=record,
             )
         )
@@ -681,6 +719,102 @@ def _append_attempt_csv(runs_dir: Path, record: dict) -> Path:
     return path
 
 
+def summarize_attempts(rows: list[dict]) -> list[dict]:
+    """Aggregate attempt rows into per-(workload, engine) summary rows.
+
+    Statistics are over *successful* attempts; ``valid_*`` statistics
+    are over successful attempts whose ``parity_status`` is ``"pass"``
+    (the only ones usable for an ordering interpretation). With zero
+    successes the runtime fields are ``None`` ("unavailable", never 0);
+    with one success the median equals that attempt and ``n`` is 1.
+    Throughput is ``input_events / median elapsed`` (aggregate
+    definition, kit 06_PERFORMANCE.md).
+    """
+    import statistics
+
+    def _median(values: list[float]) -> float | None:
+        return float(statistics.median(values)) if values else None
+
+    def _col(rows: list[dict], key: str) -> list[float]:
+        return [float(r[key]) for r in rows if r.get(key) not in (None, "")]
+
+    grouped: dict[tuple[str, str], list[dict]] = {}
+    for row in rows:
+        key = (str(row.get("workload", "")), str(row.get("engine", "")))
+        grouped.setdefault(key, []).append(row)
+    summaries: list[dict] = []
+    for (workload, engine), group in sorted(grouped.items()):
+        successes = [r for r in group if r.get("status") == "success"]
+        valid = [r for r in successes if r.get("parity_status") == "pass"]
+        elapsed = _col(successes, "elapsed_seconds")
+        valid_elapsed = _col(valid, "elapsed_seconds")
+        startup = _col(successes, "startup_seconds")
+        peak = _col(successes, "peak_tree_bytes")
+        out_bytes = _col(successes, "output_bytes")
+        input_events = group[0].get("input_events") if group else None
+        median_elapsed = _median(elapsed)
+        valid_median = _median(valid_elapsed)
+        summaries.append(
+            {
+                "workload": workload,
+                "engine": engine,
+                "attempts": len(group),
+                "successes": len(successes),
+                "failures": len(group) - len(successes),
+                "parity_pass": len(valid),
+                "parity_fail": len([r for r in successes if r.get("parity_status") == "fail"]),
+                "parity_not_run": len(
+                    [r for r in successes if r.get("parity_status") not in ("pass", "fail")]
+                ),
+                "n_success": len(successes),
+                "median_elapsed_seconds": median_elapsed,
+                "min_elapsed_seconds": min(elapsed) if elapsed else None,
+                "max_elapsed_seconds": max(elapsed) if elapsed else None,
+                "median_startup_seconds": _median(startup),
+                "median_peak_tree_bytes": _median(peak),
+                "max_peak_tree_bytes": max(peak) if peak else None,
+                "median_output_bytes": _median(out_bytes),
+                "input_events": input_events,
+                "throughput_events_per_second": (
+                    float(input_events) / median_elapsed
+                    if input_events not in (None, "") and median_elapsed
+                    else None
+                ),
+                "n_valid": len(valid),
+                "valid_median_elapsed_seconds": valid_median,
+                "valid_throughput_events_per_second": (
+                    float(input_events) / valid_median
+                    if input_events not in (None, "") and valid_median
+                    else None
+                ),
+            }
+        )
+    return summaries
+
+
+def update_parity_status(csv_path: str | Path, results: dict[str, str]) -> list[dict]:
+    """Set ``parity_status`` per run_id in an attempt CSV (in place).
+
+    ``results`` maps ``run_id`` -> ``"pass"`` | ``"fail"``. Rows whose
+    run_id is absent keep their current value. Returns the updated rows.
+    A parity failure tags the attempt's measurement invalid: callers
+    must use the ``valid_*`` summary fields for interpretation.
+    """
+    path = Path(csv_path)
+    with path.open(newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh)
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
+    for row in rows:
+        if row.get("run_id") in results:
+            row["parity_status"] = results[row["run_id"]]
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    return rows
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI: ``python -m bench.run_benchmark ...`` (standalone, not the CLI)."""
     parser = argparse.ArgumentParser(prog="bench.run_benchmark")
@@ -696,6 +830,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--shuffle-partitions", type=int, default=4)
     parser.add_argument("--no-lock", action="store_true", help="Skip the timed-run lock")
+    parser.add_argument(
+        "--segment-splits",
+        default=None,
+        help="Segment-splits sidecar JSON (Spark real mode only)",
+    )
     parser.add_argument("--plan", action="store_true", help="Print the attempt plan and exit")
     parser.add_argument("--workloads", nargs="*", default=["synthetic-1m", "synthetic-10m"])
     args = parser.parse_args(argv)
@@ -720,6 +859,7 @@ def main(argv: list[str] | None = None) -> int:
         threads=args.threads,
         shuffle_partitions=args.shuffle_partitions,
         skip_lock=args.no_lock,
+        segment_splits=args.segment_splits,
     )
     print(json.dumps({k: record.get(k) for k in ATTEMPT_CSV_HEADER}, indent=2))
     return 0 if record["status"] == "success" else 1

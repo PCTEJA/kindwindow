@@ -1,0 +1,165 @@
+{
+  "schema": "kindwindow.synthetic-params/v1",
+  "provenance": "train-only aggregate summary: local/normalized events with time < boundary_train_selection per home (reports/tables/split_summary.csv); aggregates only, never raw rows, never test/selection/calibration",
+  "source_summary": "local/runs/step12/train_summary.csv",
+  "homes": [
+    {
+      "home": "aruba",
+      "probability": 0.01966910100927689
+    },
+    {
+      "home": "hh101",
+      "probability": 0.01651898688771138
+    },
+    {
+      "home": "hh102",
+      "probability": 0.060584138211408685
+    },
+    {
+      "home": "hh103",
+      "probability": 0.06926668098620815
+    },
+    {
+      "home": "hh104",
+      "probability": 0.0580476306267077
+    },
+    {
+      "home": "hh105",
+      "probability": 0.07324196742277587
+    },
+    {
+      "home": "hh106",
+      "probability": 0.05868471249573636
+    },
+    {
+      "home": "hh108",
+      "probability": 0.08855028908473729
+    },
+    {
+      "home": "hh109",
+      "probability": 0.13183972663037363
+    },
+    {
+      "home": "hh111",
+      "probability": 0.08854936404975709
+    },
+    {
+      "home": "hh112",
+      "probability": 0.007969340805066989
+    },
+    {
+      "home": "hh113",
+      "probability": 0.028329586838881867
+    },
+    {
+      "home": "hh114",
+      "probability": 0.0871756665478305
+    },
+    {
+      "home": "hh115",
+      "probability": 0.02197831722117683
+    },
+    {
+      "home": "hh116",
+      "probability": 0.008214392849487825
+    },
+    {
+      "home": "hh117",
+      "probability": 0.01207127480859022
+    },
+    {
+      "home": "hh118",
+      "probability": 0.08178156145863545
+    },
+    {
+      "home": "hh119",
+      "probability": 0.05153949563269402
+    },
+    {
+      "home": "hh120",
+      "probability": 0.025436344653150835
+    },
+    {
+      "home": "hh122",
+      "probability": 0.01055142177979238
+    }
+  ],
+  "hourly_weights": [
+    0.012258584113913824,
+    0.007809597542153279,
+    0.006254325951780311,
+    0.0060406428713546245,
+    0.006667796031595823,
+    0.012878172543650293,
+    0.03339355722181079,
+    0.05738783400983197,
+    0.06974763750691232,
+    0.06361909575610601,
+    0.05762787030902685,
+    0.06239498668864386,
+    0.06505100879278639,
+    0.05440580902233485,
+    0.043837798281897586,
+    0.047502581310112243,
+    0.05935713070100857,
+    0.06899350787838932,
+    0.05975894534007359,
+    0.04637607371122739,
+    0.04585941084028759,
+    0.0510687967221036,
+    0.0411106101532785,
+    0.020598226699720428
+  ],
+  "type_probs": {
+    "door": 0.008439053011678525,
+    "motion": 0.9915609469883214
+  },
+  "message_probs": {
+    "door": {
+      "CLOSE": 0.5000742936621416,
+      "OPEN": 0.4999257063378583
+    },
+    "motion": {
+      "OFF": 0.5000328798185001,
+      "ON": 0.4999671201814999
+    }
+  },
+  "sensors": {
+    "door": [
+      "Bathroom",
+      "Bedroom",
+      "Kitchen",
+      "OutsideDoor"
+    ],
+    "motion": [
+      "Bathroom",
+      "Bedroom",
+      "Chair",
+      "DiningRoom",
+      "GuestRoom",
+      "Kitchen",
+      "LivingRoom",
+      "LoungeChair",
+      "Office",
+      "OtherRoom",
+      "OutsideDoor",
+      "WorkArea"
+    ]
+  },
+  "interarrival_seconds": {
+    "distribution": "exponential",
+    "mean_seconds": 23.077217
+  },
+  "burst": {
+    "probability": 0.992749,
+    "gap_seconds": [
+      0,
+      300.0
+    ]
+  },
+  "hour_weight_floor": 0.005,
+  "start": "2030-02-01T08:00:00",
+  "member": "synthetic.jsonl",
+  "fit_defaults_used": [],
+  "fitted_from_summary_sha256": "477d40909ceeb56f8e0452e7b096fd8fb9d2f7655630dccc3e24a38940ed1bc5"
+}

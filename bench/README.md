@@ -134,13 +134,28 @@ samples) plus `<run_id>.worker.json`, `<run_id>.stdout.log` and
 `<run_id>.stderr.log`. All failed attempts are preserved, including
 timing/reason and last resource sample.
 
-## Step 12 (not now)
+## Step 12 (real study — run)
 
-Step 12 will: fit real train-only params from a train-only aggregate
-summary (`generators.synthetic.fit_params_from_summary_csv`, never raw
-data) to replace `params_dev.json`; generate the 1M and 10M synthetic
-workloads plus the real audited cohort; run 3 attempts per engine per
-core workload (18 records planned, failures included) in the alternating
-order above; run parity on every completed pair; and report
-median/min/max of successful end-to-end runtimes, startup separately,
-throughput, peak tree memory, output bytes and failures/attempts.
+Step 12 ran the real study (18 attempts, 15 successes) with the
+harness above plus a real-workload mode (`--input-kind parquet`):
+
+* Synthetic workloads use the JSONL pipeline as described above.
+  The pandas path additionally writes + rereads normalized Parquet
+  (`run_pipeline`); the Spark path does not persist a normalized
+  copy — see `reports/benchmarks/README.md` for the scope note.
+* Real workload: both engines read the same normalized Parquet tree
+  (`local/normalized`, 78,275,425 events), compute windows, and write
+  windows as Snappy Parquet (home + year-month). Times are floored to
+  whole seconds for both engines (shared second-resolution contract).
+  Spark reads with an explicit schema (`time` as `LongType` epoch ns;
+  PySpark 3.5 rejects `TIMESTAMP(NANOS)`) and applies the frozen
+  segmentation rule from a precomputed sidecar
+  (`local/runs/step12/segment_splits.json`) plus a first-segment-wins
+  dedup; pandas computes the rule in-process. Validated pre-study on
+  aruba and hh108 (parity passes on all compared columns).
+* Results: `reports/benchmarks/` (README, attempts.csv, summary.csv,
+  parity.json); machine record + inventory:
+  `local/runs/step12/manifest.json`. Headline: pandas faster at 1M
+  (44.2 s vs 60.8 s median, n=3 valid pairs) and at real (109.8 s vs
+  305.4 s, n=3 valid pairs); pandas 10M 0/3 (`memory_limit`), Spark
+  10M 3/3 (median 228.1 s, feasibility observation only).
