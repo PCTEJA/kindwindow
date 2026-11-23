@@ -57,6 +57,18 @@ uv run --locked kindwindow doctor
 
 `doctor` prints the Python version and checks that the golden fixture (`tests/fixtures/golden_events.jsonl`, 9 fabricated events, and `tests/fixtures/golden_windows.csv`, 3 windows) is present. No network, CASAS data, or credentials are needed for this check.
 
+## Integrated demo and slides
+
+```bash
+uv run --locked python demo/run_demo.py
+```
+
+Runs the scripted synthetic resident/contact walkthrough against the
+local app and measures loopback latency. See `docs/demo.md` for the
+protocol, measured results, and the walkthrough narrative, and
+`slides/slides.md` for the 15-minute presentation (presenter: Teja
+Piepur Chakravarthi).
+
 ## Project layout
 
 - `src/kindwindow/` — package and CLI

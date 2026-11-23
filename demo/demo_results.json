@@ -1,0 +1,375 @@
+{
+  "steps": [
+    "0. Release commit and doctor",
+    "1. Golden fixture through the clean pandas pipeline",
+    "2. Start the local demo app (loopback, synthetic only)",
+    "3. Walkthrough \u2014 synthetic resident Rosa and Contact A",
+    "4. Loopback latency (10 warm-ups + 100 measured, concurrency 1)",
+    "5. Delete the synthetic demo records"
+  ],
+  "checks": [
+    {
+      "name": "doctor OK",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "golden pipeline runs",
+      "ok": true,
+      "detail": "kindwindow pipeline: pandas/fixture -> /tmp/kindwindow-pipeline-__bt84hf\n  total_lines: 9\n  accepted_first: 9\n  quarantined_first: 0\n  replays: 0\n  ignored: 0\n  ledger_reconciles: True\n  n_events: 9  n_windows: 3\n  n_excluded_windows: 0  n_discarded_duplicate_windows: 0"
+    },
+    {
+      "name": "server ready",
+      "ok": true,
+      "detail": "server exited early; see demo/server.log"
+    },
+    {
+      "name": "login resident",
+      "ok": true,
+      "detail": "{'identity': 'resident', 'role': 'resident', 'resident_id': 1, 'contact_id': None, 'demo': 'Local demo \u2014 synthetic identities only. No real people are contacted.'}"
+    },
+    {
+      "name": "login contact-a",
+      "ok": true,
+      "detail": "{'identity': 'contact-a', 'role': 'contact', 'resident_id': None, 'contact_id': 1, 'demo': 'Local demo \u2014 synthetic identities only. No real people are contacted.'}"
+    },
+    {
+      "name": "login contact-b",
+      "ok": true,
+      "detail": "{'identity': 'contact-b', 'role': 'contact', 'resident_id': None, 'contact_id': 2, 'demo': 'Local demo \u2014 synthetic identities only. No real people are contacted.'}"
+    },
+    {
+      "name": "unauthenticated /preferences -> 401",
+      "ok": true,
+      "detail": "got 401"
+    },
+    {
+      "name": "propose with no preferences -> 409, nothing invented",
+      "ok": true,
+      "detail": "409 no preferred hours set; set preferred hours first"
+    },
+    {
+      "name": "set initial preferences (weekdays 09:00-17:00, quiet 12:00-13:00)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "parse note -> pending only",
+      "ok": true,
+      "detail": "{'parsed': {'days': [1], 'preferred_range': ['09:00', '12:00'], 'quiet_range': ['10:00', '10:30']}, 'pending_preferences': {'preferred_days': [1], 'preferred_start': '09:00', 'preferred_end': '12:00', 'quiet_start': '10:00', 'quiet_end': '10:30'}, 'detail': 'parsed fields are pending confirmation'}"
+    },
+    {
+      "name": "cancel pending changes (deliberate cancel)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "after cancel, live prefs unchanged (weekdays 09:00-17:00)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "parse note again",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "confirm pending changes -> now live",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "confirmed prefs are Monday 09:00-12:00, quiet 10:00-10:30",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "propose quiet hours (Mon 10:15) -> 409",
+      "ok": true,
+      "detail": "slot is within quiet hours"
+    },
+    {
+      "name": "propose outside preferred hours (Mon 13:00) -> 409",
+      "ok": true,
+      "detail": "slot is outside preferred hours"
+    },
+    {
+      "name": "propose non-preferred day (Tue 11:00) -> 409",
+      "ok": true,
+      "detail": "slot is not on a preferred day"
+    },
+    {
+      "name": "propose to ungranted contact -> 403",
+      "ok": true,
+      "detail": "got 403"
+    },
+    {
+      "name": "propose Mon 11:00 to Contact A -> 201 pending",
+      "ok": true,
+      "detail": "{'invitation_id': 1, 'resident_id': 1, 'contact_id': 1, 'slot_start_utc': 1795431600, 'state': 'pending', 'expires_utc': None, 'request_key': 'walk-a1', 'experimental_probability': 0.42}"
+    },
+    {
+      "name": "resident view carries synthetic experimental probability 0.42",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Contact A inbox empty while pending",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "duplicate replay -> 200, same invitation id",
+      "ok": true,
+      "detail": "200 id=1"
+    },
+    {
+      "name": "approve -> 200 approved with 1h expiry",
+      "ok": true,
+      "detail": "{'invitation_id': 1, 'resident_id': 1, 'contact_id': 1, 'slot_start_utc': 1795431600, 'state': 'approved', 'expires_utc': 1795411814, 'request_key': 'walk-a1', 'experimental_probability': 0.42}"
+    },
+    {
+      "name": "Contact A inbox has the approved invitation, whitelisted fields only",
+      "ok": true,
+      "detail": "{'demo': 'Local demo \u2014 synthetic identities only. No real people are contacted.', 'invitations': [{'invitation_id': 1, 'slot_start_utc': 1795431600, 'expires_utc': 1795411814}]}"
+    },
+    {
+      "name": "Contact B inbox stays empty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "propose second invitation (Mon 11:30) -> 201",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "approve second invitation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "postpone to next Mon 11:00 -> postponed, expiry cleared",
+      "ok": true,
+      "detail": "{'invitation_id': 2, 'resident_id': 1, 'contact_id': 1, 'slot_start_utc': 1796036400, 'state': 'postponed', 'expires_utc': None, 'request_key': 'walk-a2', 'experimental_probability': 0.42}"
+    },
+    {
+      "name": "after postpone, Contact A sees only the first invitation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fresh approval after postpone -> 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "propose to Contact B (Mon 11:00) -> 201",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "reject -> 200 rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stale approval of rejected proposal -> 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pause invalidates approved invitations",
+      "ok": true,
+      "detail": "{'paused': True, 'invalidated_approved': 2, 'detail': 'Paused. Approved invitations were invalidated and need fresh approval after resume.'}"
+    },
+    {
+      "name": "Contact A inbox empty while paused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "resume -> 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "after resume, still nothing until fresh approval",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fresh approval after resume -> 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Contact A sees the re-approved invitation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "revoke -> 200 revoked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Contact A inbox empty after revoke",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "second revoke -> 200 revoked (idempotent)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "latency GET /: n=100 errors=0",
+      "ok": true,
+      "detail": "p50=1.641 ms p95=2.238 ms"
+    },
+    {
+      "name": "latency GET /preferences: n=100 errors=0",
+      "ok": true,
+      "detail": "p50=2.814 ms p95=3.376 ms"
+    },
+    {
+      "name": "latency GET /invitations: n=100 errors=0",
+      "ok": true,
+      "detail": "p50=3.012 ms p95=3.765 ms"
+    },
+    {
+      "name": "latency GET /contact/invitations: n=100 errors=0",
+      "ok": true,
+      "detail": "p50=3.294 ms p95=4.259 ms"
+    },
+    {
+      "name": "latency POST /preferences: n=100 errors=0",
+      "ok": true,
+      "detail": "p50=3.332 ms p95=3.841 ms"
+    },
+    {
+      "name": "demo delete -> remaining_invitations 0",
+      "ok": true,
+      "detail": "{'deleted': True, 'detail': 'Synthetic demo records for this resident were deleted; dependent invitations, preferences, grants and sessions were removed. No aggregate test records are retained.', 'remaining_invitations': 0}"
+    },
+    {
+      "name": "resident session invalidated after delete -> 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "contact session invalidated after delete -> 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "login after delete fails -> 401",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "commit": "2942dfb15245592bdf007f3d62b7e222e3bd317c",
+  "branch": "main",
+  "doctor": "Python 3.12.3\nkindwindow: /home/hatch/workspace/kindwindow\nOK  golden_events: /home/hatch/workspace/kindwindow/tests/fixtures/golden_events.jsonl (9 events)\nOK  golden_windows: /home/hatch/workspace/kindwindow/tests/fixtures/golden_windows.csv\nOK  study config: /home/hatch/workspace/kindwindow/configs/study.json (valid JSON, pre-freeze template)\ndoctor: OK",
+  "pipeline": "kindwindow pipeline: pandas/fixture -> /tmp/kindwindow-pipeline-__bt84hf\n  total_lines: 9\n  accepted_first: 9\n  quarantined_first: 0\n  replays: 0\n  ignored: 0\n  ledger_reconciles: True\n  n_events: 9  n_windows: 3\n  n_excluded_windows: 0  n_discarded_duplicate_windows: 0",
+  "golden_windows": [
+    {
+      "home": "fixture-A",
+      "t": "2030-02-01T10:00:00",
+      "count_5m": "2",
+      "count_30m": "3",
+      "count_120m": "4",
+      "door_30m": "2",
+      "recency_seconds": "1",
+      "y": "0"
+    },
+    {
+      "home": "fixture-A",
+      "t": "2030-02-01T10:30:00",
+      "count_5m": "0",
+      "count_30m": "1",
+      "count_120m": "4",
+      "door_30m": "0",
+      "recency_seconds": "1800",
+      "y": "1"
+    },
+    {
+      "home": "fixture-A",
+      "t": "2030-02-01T11:00:00",
+      "count_5m": "0",
+      "count_30m": "2",
+      "count_120m": "6",
+      "door_30m": "1",
+      "recency_seconds": "1800",
+      "y": "0"
+    }
+  ],
+  "cold_start_seconds": 0.55,
+  "latency": {
+    "GET /": {
+      "n": 100,
+      "warmup": 10,
+      "errors": 0,
+      "p50_ms": 1.641,
+      "p95_ms": 2.238,
+      "min_ms": 1.216,
+      "max_ms": 3.199,
+      "mean_ms": 1.671
+    },
+    "GET /preferences": {
+      "n": 100,
+      "warmup": 10,
+      "errors": 0,
+      "p50_ms": 2.814,
+      "p95_ms": 3.376,
+      "min_ms": 2.42,
+      "max_ms": 3.977,
+      "mean_ms": 2.864
+    },
+    "GET /invitations": {
+      "n": 100,
+      "warmup": 10,
+      "errors": 0,
+      "p50_ms": 3.012,
+      "p95_ms": 3.765,
+      "min_ms": 2.548,
+      "max_ms": 7.619,
+      "mean_ms": 3.14
+    },
+    "GET /contact/invitations": {
+      "n": 100,
+      "warmup": 10,
+      "errors": 0,
+      "p50_ms": 3.294,
+      "p95_ms": 4.259,
+      "min_ms": 2.489,
+      "max_ms": 5.926,
+      "mean_ms": 3.385
+    },
+    "POST /preferences": {
+      "n": 100,
+      "warmup": 10,
+      "errors": 0,
+      "p50_ms": 3.332,
+      "p95_ms": 3.841,
+      "min_ms": 2.878,
+      "max_ms": 4.16,
+      "mean_ms": 3.355
+    }
+  },
+  "latency_samples": "demo/latency_samples.csv",
+  "machine": {
+    "platform": "Linux-7.0.0-44-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpus": 4,
+    "mem_total_kb": 8124900,
+    "sqlite": "3.45.1",
+    "versions": {
+      "fastapi": "0.115.12",
+      "uvicorn": "0.34.2"
+    },
+    "db": "fresh temp SQLite (WAL) per run; foreign_keys ON"
+  },
+  "generated_at_utc": "2026-11-23T04:30:16.731806+00:00"
+}

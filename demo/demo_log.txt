@@ -1,0 +1,141 @@
+
+== 0. Release commit and doctor ==
+branch: main  commit: 2942dfb15245592bdf007f3d62b7e222e3bd317c
+$ /home/hatch/.local/bin/uv run --locked kindwindow doctor
+Python 3.12.3
+kindwindow: /home/hatch/workspace/kindwindow
+OK  golden_events: /home/hatch/workspace/kindwindow/tests/fixtures/golden_events.jsonl (9 events)
+OK  golden_windows: /home/hatch/workspace/kindwindow/tests/fixtures/golden_windows.csv
+OK  study config: /home/hatch/workspace/kindwindow/configs/study.json (valid JSON, pre-freeze template)
+doctor: OK
+  [PASS] doctor OK
+
+== 1. Golden fixture through the clean pandas pipeline ==
+$ /home/hatch/.local/bin/uv run --locked kindwindow pipeline --engine pandas --workload fixture --out /tmp/kindwindow-pipeline-__bt84hf
+kindwindow pipeline: pandas/fixture -> /tmp/kindwindow-pipeline-__bt84hf
+  total_lines: 9
+  accepted_first: 9
+  quarantined_first: 0
+  replays: 0
+  ignored: 0
+  ledger_reconciles: True
+  n_events: 9  n_windows: 3
+  n_excluded_windows: 0  n_discarded_duplicate_windows: 0
+  [PASS] golden pipeline runs — kindwindow pipeline: pandas/fixture -> /tmp/kindwindow-pipeline-__bt84hf
+  total_lines: 9
+  accepted_first: 9
+  quarantined_first: 0
+  replays: 0
+  ignored: 0
+  ledger_reconciles: True
+  n_events: 9  n_windows: 3
+  n_excluded_windows: 0  n_discarded_duplicate_windows: 0
+Golden windows (tests/fixtures/golden_windows.csv):
+  t=2030-02-01T10:00:00 count_30m=3 recency_s=1 label=0
+  t=2030-02-01T10:30:00 count_30m=1 recency_s=1800 label=1
+  t=2030-02-01T11:00:00 count_30m=2 recency_s=1800 label=0
+Why the 10:30 event belongs to the NEXT forecast:
+  The target interval is half-open [t, t+30m): an event exactly
+  at t belongs to that window's target; an event exactly at t+30m
+  belongs to the next target. The 10:30 motion ON (and door OPEN)
+  fall at the end of the 10:00 window's target [10:00, 10:30), so
+  the 10:00 window has label 0, and the 10:30 window — whose target
+  is [10:30, 11:00) — has label 1. History is [t-w, t), so the
+  10:30 window's 30-minute history counts the 10:00 OFF (count_30m=1)
+  but not the 10:30 events themselves.
+
+== 2. Start the local demo app (loopback, synthetic only) ==
+cold launch to ready: 0.550 s (process spawn -> first HTTP 200 on GET /)
+  [PASS] server ready — server exited early; see demo/server.log
+
+== 3. Walkthrough — synthetic resident Rosa and Contact A ==
+Resident: Rosa (synthetic resident, app identity 'resident')
+Contact:  Contact A (synthetic contact, app identity 'contact-a') (invited); Contact B (synthetic contact, app identity 'contact-b') (unrelated, must see nothing)
+  [PASS] login resident — {'identity': 'resident', 'role': 'resident', 'resident_id': 1, 'contact_id': None, 'demo': 'Local demo — synthetic identities only. No real people are contacted.'}
+  [PASS] login contact-a — {'identity': 'contact-a', 'role': 'contact', 'resident_id': None, 'contact_id': 1, 'demo': 'Local demo — synthetic identities only. No real people are contacted.'}
+  [PASS] login contact-b — {'identity': 'contact-b', 'role': 'contact', 'resident_id': None, 'contact_id': 2, 'demo': 'Local demo — synthetic identities only. No real people are contacted.'}
+  [PASS] unauthenticated /preferences -> 401 — got 401
+  [PASS] propose with no preferences -> 409, nothing invented — 409 no preferred hours set; set preferred hours first
+  (Missing input: the app refuses and says what is missing; it never invents a time or a forecast.)
+  [PASS] set initial preferences (weekdays 09:00-17:00, quiet 12:00-13:00)
+  [PASS] parse note -> pending only — {'parsed': {'days': [1], 'preferred_range': ['09:00', '12:00'], 'quiet_range': ['10:00', '10:30']}, 'pending_preferences': {'preferred_days': [1], 'preferred_start': '09:00', 'preferred_end': '12:00', 'quiet_start': '10:00', 'quiet_end': '10:30'}, 'detail': 'parsed fields are pending confirmation'}
+  note: 'Monday: available 09:00-12:00; quiet 10:00-10:30.'
+  parsed (pending, not yet live): {'days': [1], 'preferred_range': ['09:00', '12:00'], 'quiet_range': ['10:00', '10:30']}
+  [PASS] cancel pending changes (deliberate cancel)
+  [PASS] after cancel, live prefs unchanged (weekdays 09:00-17:00)
+  [PASS] parse note again
+  [PASS] confirm pending changes -> now live
+  [PASS] confirmed prefs are Monday 09:00-12:00, quiet 10:00-10:30
+  Abstention in the app: an invalid slot is refused with a
+  reason (409); the app never guesses a time. The study's
+  abstention is separate: frozen gates withhold uncertain
+  windows (50% retention -> macro Brier 0.069 on retained).
+  [PASS] propose quiet hours (Mon 10:15) -> 409 — slot is within quiet hours
+  [PASS] propose outside preferred hours (Mon 13:00) -> 409 — slot is outside preferred hours
+  [PASS] propose non-preferred day (Tue 11:00) -> 409 — slot is not on a preferred day
+  [PASS] propose to ungranted contact -> 403 — got 403
+  [PASS] propose Mon 11:00 to Contact A -> 201 pending — {'invitation_id': 1, 'resident_id': 1, 'contact_id': 1, 'slot_start_utc': 1795431600, 'state': 'pending', 'expires_utc': None, 'request_key': 'walk-a1', 'experimental_probability': 0.42}
+  [PASS] resident view carries synthetic experimental probability 0.42
+  Forecast context: the resident view shows a synthetic
+  experimental probability (0.42, fixed demo value). The
+  approval path works without it, and it is never sent to
+  contacts (see the whitelisted inbox below).
+  [PASS] Contact A inbox empty while pending
+  [PASS] duplicate replay -> 200, same invitation id — 200 id=1
+  [PASS] approve -> 200 approved with 1h expiry — {'invitation_id': 1, 'resident_id': 1, 'contact_id': 1, 'slot_start_utc': 1795431600, 'state': 'approved', 'expires_utc': 1795411814, 'request_key': 'walk-a1', 'experimental_probability': 0.42}
+  approved; expires_utc=1795411814 (now + 3600 s). Expiry at the exact second is covered by
+  tests/test_app.py::test_expiry_at_exact_expires_at (fake clock);
+  the live demo does not sleep for an hour to show it.
+  [PASS] Contact A inbox has the approved invitation, whitelisted fields only — {'demo': 'Local demo — synthetic identities only. No real people are contacted.', 'invitations': [{'invitation_id': 1, 'slot_start_utc': 1795431600, 'expires_utc': 1795411814}]}
+  [PASS] Contact B inbox stays empty
+  [PASS] propose second invitation (Mon 11:30) -> 201
+  [PASS] approve second invitation
+  [PASS] postpone to next Mon 11:00 -> postponed, expiry cleared — {'invitation_id': 2, 'resident_id': 1, 'contact_id': 1, 'slot_start_utc': 1796036400, 'state': 'postponed', 'expires_utc': None, 'request_key': 'walk-a2', 'experimental_probability': 0.42}
+  [PASS] after postpone, Contact A sees only the first invitation
+  [PASS] fresh approval after postpone -> 200
+  [PASS] propose to Contact B (Mon 11:00) -> 201
+  [PASS] reject -> 200 rejected
+  [PASS] stale approval of rejected proposal -> 409
+  [PASS] pause invalidates approved invitations — {'paused': True, 'invalidated_approved': 2, 'detail': 'Paused. Approved invitations were invalidated and need fresh approval after resume.'}
+  [PASS] Contact A inbox empty while paused
+  [PASS] resume -> 200
+  [PASS] after resume, still nothing until fresh approval
+  [PASS] fresh approval after resume -> 200
+  [PASS] Contact A sees the re-approved invitation
+  [PASS] revoke -> 200 revoked
+  [PASS] Contact A inbox empty after revoke
+  [PASS] second revoke -> 200 revoked (idempotent)
+
+== 4. Loopback latency (10 warm-ups + 100 measured, concurrency 1) ==
+Protocol: monotonic client timer (time.perf_counter_ns),
+boundary = request start -> response fully read; one client
+at a time; warm-up calls discarded; the POST /preferences
+case re-applies the identical confirmed prefs (idempotent
+upsert), so no state reset is needed between timed calls.
+No other heavy work ran during timing. Machine: x86_64, 4 CPUs, Python 3.12.3.
+  [PASS] latency GET /: n=100 errors=0 — p50=1.641 ms p95=2.238 ms
+    GET /: p50=1.641 ms p95=2.238 ms min=1.216 ms max=3.199 ms mean=1.671 ms
+  [PASS] latency GET /preferences: n=100 errors=0 — p50=2.814 ms p95=3.376 ms
+    GET /preferences: p50=2.814 ms p95=3.376 ms min=2.42 ms max=3.977 ms mean=2.864 ms
+  [PASS] latency GET /invitations: n=100 errors=0 — p50=3.012 ms p95=3.765 ms
+    GET /invitations: p50=3.012 ms p95=3.765 ms min=2.548 ms max=7.619 ms mean=3.14 ms
+  [PASS] latency GET /contact/invitations: n=100 errors=0 — p50=3.294 ms p95=4.259 ms
+    GET /contact/invitations: p50=3.294 ms p95=4.259 ms min=2.489 ms max=5.926 ms mean=3.385 ms
+  [PASS] latency POST /preferences: n=100 errors=0 — p50=3.332 ms p95=3.841 ms
+    POST /preferences: p50=3.332 ms p95=3.841 ms min=2.878 ms max=4.16 ms mean=3.355 ms
+  Suggested dev budget (packet 07): p95 <= 200 ms for simple
+  reads/writes on an idle laptop. Verdict per endpoint is in
+  docs/demo.md; the numbers above are the measured values.
+
+== 5. Delete the synthetic demo records ==
+  [PASS] demo delete -> remaining_invitations 0 — {'deleted': True, 'detail': 'Synthetic demo records for this resident were deleted; dependent invitations, preferences, grants and sessions were removed. No aggregate test records are retained.', 'remaining_invitations': 0}
+  [PASS] resident session invalidated after delete -> 401
+  [PASS] contact session invalidated after delete -> 401
+  [PASS] login after delete fails -> 401
+  Fresh synthetic fixtures are reseeded on the next start,
+  so repeat presentations begin from identical state.
+
+DEMO FINISHED: all checks passed.
+Log: demo/demo_log.txt
+Results: demo/demo_results.json
+Raw latency samples: demo/latency_samples.csv
