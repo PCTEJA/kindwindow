@@ -1,8 +1,9 @@
 """Minimal KindWindow CLI.
 
-PR 01 implements only ``doctor``. All other commands in the README
-acceptance contract are stubs that exit nonzero with a not-implemented
-message, so a caller can never mistake a stub for a real run.
+PR 01 implements only ``doctor``. Step 06 adds a real ``notes-parse``
+command; all other commands in the README acceptance contract are stubs
+that exit nonzero with a not-implemented message, so a caller can never
+mistake a stub for a real run.
 """
 
 from __future__ import annotations
@@ -40,6 +41,14 @@ def _fixture_paths() -> dict[str, Path]:
         "golden_events": root / "tests" / "fixtures" / "golden_events.jsonl",
         "golden_windows": root / "tests" / "fixtures" / "golden_windows.csv",
     }
+
+
+def cmd_notes_parse(args: argparse.Namespace) -> int:
+    """Parse one free-text note and print the structured fields as JSON."""
+    from kindwindow.preferences import parse_note
+
+    print(json.dumps(parse_note(args.text)))
+    return 0
 
 
 def cmd_doctor(_args: argparse.Namespace) -> int:
@@ -85,6 +94,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="kindwindow", description="KindWindow CLI")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor", help="Print Python version and check the golden fixture exists")
+    notes_parse = sub.add_parser(
+        "notes-parse", help="Parse one free-text note to JSON preference fields"
+    )
+    notes_parse.add_argument("--text", required=True, help="Free-text note to parse")
     for name in _FUTURE_COMMANDS:
         sub.add_parser(name, help=f"(not implemented in PR 01) {name}")
     return parser
@@ -95,6 +108,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "doctor":
         return cmd_doctor(args)
+    if args.command == "notes-parse":
+        return cmd_notes_parse(args)
     return cmd_not_implemented(args.command)
 
 

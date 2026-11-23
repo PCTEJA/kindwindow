@@ -1,0 +1,40 @@
+{"id":"S001","family":"direct_preference","text":"Call me on Monday between 9 am and 11 am.","gold":{"days":[1],"preferred_range":["09:00","11:00"],"quiet_range":null}}
+{"id":"S002","family":"direct_preference","text":"Calls on Tuesday from 1 pm to 3 pm, please.","gold":{"days":[2],"preferred_range":["13:00","15:00"],"quiet_range":null}}
+{"id":"S003","family":"direct_preference","text":"Please call on Thursday from 08:30 to 09:45.","gold":{"days":[4],"preferred_range":["08:30","09:45"],"quiet_range":null}}
+{"id":"S004","family":"direct_preference","text":"Call me Fridays between noon and 2 pm.","gold":{"days":[5],"preferred_range":["12:00","14:00"],"quiet_range":null}}
+{"id":"S005","family":"direct_preference","text":"On Sunday, call from 4 pm to 5:30 pm.","gold":{"days":[7],"preferred_range":["16:00","17:30"],"quiet_range":null}}
+{"id":"S006","family":"direct_quiet","text":"Quiet time on Monday from noon to 1 pm.","gold":{"days":[1],"preferred_range":null,"quiet_range":["12:00","13:00"]}}
+{"id":"S007","family":"direct_quiet","text":"Quiet time every Saturday from 14:00 to 16:00.","gold":{"days":[6],"preferred_range":null,"quiet_range":["14:00","16:00"]}}
+{"id":"S008","family":"direct_quiet","text":"Sunday quiet time is 7 pm to 9 pm.","gold":{"days":[7],"preferred_range":null,"quiet_range":["19:00","21:00"]}}
+{"id":"S009","family":"direct_quiet","text":"Keep quiet Tuesdays from 8 am to 8:45 am.","gold":{"days":[2],"preferred_range":null,"quiet_range":["08:00","08:45"]}}
+{"id":"S010","family":"direct_quiet","text":"Thursday quiet time runs from 10 pm to 2 am.","gold":{"days":[4],"preferred_range":null,"quiet_range":["22:00","02:00"]}}
+{"id":"S011","family":"group_calendar","text":"Weekdays work from 9 am to noon.","gold":{"days":[1,2,3,4,5],"preferred_range":["09:00","12:00"],"quiet_range":null}}
+{"id":"S012","family":"group_calendar","text":"Weekends work between 10 am and 1 pm.","gold":{"days":[6,7],"preferred_range":["10:00","13:00"],"quiet_range":null}}
+{"id":"S013","family":"group_calendar","text":"Every day works from 18:00 to 19:00.","gold":{"days":[1,2,3,4,5,6,7],"preferred_range":["18:00","19:00"],"quiet_range":null}}
+{"id":"S014","family":"group_calendar","text":"Weekdays work between 4:15 pm and 5 pm.","gold":{"days":[1,2,3,4,5],"preferred_range":["16:15","17:00"],"quiet_range":null}}
+{"id":"S015","family":"group_calendar","text":"Weekends work from noon to 12:30 pm.","gold":{"days":[6,7],"preferred_range":["12:00","12:30"],"quiet_range":null}}
+{"id":"S016","family":"two_part_day","text":"Monday: available 09:00–12:00; quiet 10:00–10:30.","gold":{"days":[1],"preferred_range":["09:00","12:00"],"quiet_range":["10:00","10:30"]}}
+{"id":"S017","family":"two_part_day","text":"Wednesday: available 14:00–18:00; quiet 15:00–16:00.","gold":{"days":[3],"preferred_range":["14:00","18:00"],"quiet_range":["15:00","16:00"]}}
+{"id":"S018","family":"two_part_day","text":"Thursday: available 10:00–11:00; quiet 20:00–21:00.","gold":{"days":[4],"preferred_range":["10:00","11:00"],"quiet_range":["20:00","21:00"]}}
+{"id":"S019","family":"two_part_day","text":"Friday: available 16:30–19:30; quiet 18:00–19:00.","gold":{"days":[5],"preferred_range":["16:30","19:30"],"quiet_range":["18:00","19:00"]}}
+{"id":"S020","family":"two_part_day","text":"Saturday: available 08:00–10:00; quiet 09:00–09:15.","gold":{"days":[6],"preferred_range":["08:00","10:00"],"quiet_range":["09:00","09:15"]}}
+{"id":"S021","family":"named_list","text":"Mon and Wed are good from 8 am to 10 am.","gold":{"days":[1,3],"preferred_range":["08:00","10:00"],"quiet_range":null}}
+{"id":"S022","family":"named_list","text":"Tue and Fri are good from 14:15 to 15:30.","gold":{"days":[2,5],"preferred_range":["14:15","15:30"],"quiet_range":null}}
+{"id":"S023","family":"named_list","text":"Sat and Sun are good from 6 pm to 8 pm.","gold":{"days":[6,7],"preferred_range":["18:00","20:00"],"quiet_range":null}}
+{"id":"S024","family":"named_list","text":"Mon, Thu and Sat are good from 11 am to noon.","gold":{"days":[1,4,6],"preferred_range":["11:00","12:00"],"quiet_range":null}}
+{"id":"S025","family":"named_list","text":"Wed and Fri are good from noon to 4 pm.","gold":{"days":[3,5],"preferred_range":["12:00","16:00"],"quiet_range":null}}
+{"id":"S026","family":"no_ring","text":"Do not ring on weekdays between 11 pm and 6 am.","gold":{"days":[1,2,3,4,5],"preferred_range":null,"quiet_range":["23:00","06:00"]}}
+{"id":"S027","family":"no_ring","text":"Do not ring Sunday between noon and 2 pm.","gold":{"days":[7],"preferred_range":null,"quiet_range":["12:00","14:00"]}}
+{"id":"S028","family":"no_ring","text":"Please don't ring Monday between 10:00 and 11:00.","gold":{"days":[1],"preferred_range":null,"quiet_range":["10:00","11:00"]}}
+{"id":"S029","family":"no_ring","text":"Do not ring Friday from 9:30 pm to midnight.","gold":{"days":[5],"preferred_range":null,"quiet_range":["21:30","00:00"]}}
+{"id":"S030","family":"no_ring","text":"Don't ring Saturday from midnight to 7 am.","gold":{"days":[6],"preferred_range":null,"quiet_range":["00:00","07:00"]}}
+{"id":"S031","family":"day_only","text":"My preferred days are Monday and Thursday.","gold":{"days":[1,4],"preferred_range":null,"quiet_range":null}}
+{"id":"S032","family":"day_only","text":"My preferred days are weekends.","gold":{"days":[6,7],"preferred_range":null,"quiet_range":null}}
+{"id":"S033","family":"day_only","text":"I prefer Wednesday.","gold":{"days":[3],"preferred_range":null,"quiet_range":null}}
+{"id":"S034","family":"day_only","text":"I prefer weekdays.","gold":{"days":[1,2,3,4,5],"preferred_range":null,"quiet_range":null}}
+{"id":"S035","family":"day_only","text":"I'd prefer Sunday and Tuesday.","gold":{"days":[2,7],"preferred_range":null,"quiet_range":null}}
+{"id":"S036","family":"time_only","text":"I'm available from 10 am to 11 am.","gold":{"days":null,"preferred_range":["10:00","11:00"],"quiet_range":null}}
+{"id":"S037","family":"time_only","text":"I'm available from 07:30 to 08:15.","gold":{"days":null,"preferred_range":["07:30","08:15"],"quiet_range":null}}
+{"id":"S038","family":"time_only","text":"I'm available from noon to 1 pm.","gold":{"days":null,"preferred_range":["12:00","13:00"],"quiet_range":null}}
+{"id":"S039","family":"time_only","text":"I'm available from 9 pm to midnight.","gold":{"days":null,"preferred_range":["21:00","00:00"],"quiet_range":null}}
+{"id":"S040","family":"time_only","text":"I'm available from 4:45 pm to 5:30 pm.","gold":{"days":null,"preferred_range":["16:45","17:30"],"quiet_range":null}}
