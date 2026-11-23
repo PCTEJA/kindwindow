@@ -193,16 +193,41 @@ def test_preferences_conflict_and_bad_input(clients):
     ).status_code == 422
 
 
-def test_notes_parse_is_stub_and_changes_nothing(clients):
+def test_notes_parse_partial_changes_nothing_live(clients):
     set_prefs(clients["resident"])
+    # "weekdays" parses, but bare hours / a stray single time are refused,
+    # so only days are pending — live preferences stay unchanged.
     r = clients["resident"].post("/notes/parse", json={"text": "weekdays 9 to 5, quiet at noon"})
-    assert r.status_code == 501
-    assert "not implemented" in r.json()["detail"]
+    assert r.status_code == 200
+    assert r.json()["parsed"] == {
+        "days": [1, 2, 3, 4, 5],
+        "preferred_range": None,
+        "quiet_range": None,
+    }
+    assert r.json()["pending_preferences"]["preferred_days"] == [1, 2, 3, 4, 5]
     assert clients["resident"].get("/preferences").json()["preferences"]["preferred_days"] == [
         1, 2, 3, 4, 5,
     ]
     # Contact may not parse notes either.
     assert clients["a"].post("/notes/parse", json={"text": "x"}).status_code == 403
+
+
+def test_notes_parse_stores_pending_for_confirmation(clients):
+    r = clients["resident"].post(
+        "/notes/parse", json={"text": "Monday: available 09:00-12:00; quiet 10:00-10:30."}
+    )
+    assert r.status_code == 200
+    assert r.json()["parsed"] == {
+        "days": [1],
+        "preferred_range": ["09:00", "12:00"],
+        "quiet_range": ["10:00", "10:30"],
+    }
+    pending = clients["resident"].get("/preferences").json()["pending_preferences"]
+    assert pending is not None
+    assert pending["preferred_days"] == [1]
+    assert pending["preferred_start"] == "09:00"
+    # Live preferences are unchanged until confirm (no live row yet).
+    assert clients["resident"].get("/preferences").json()["preferences"] is None
 
 
 def test_confirm_and_cancel_pending_changes(app_and_db, clients):

@@ -494,17 +494,64 @@ def create_app(db_path: str | Path, clock: Callable[[], float] | None = None) ->
         sess, err = require(request, "resident")
         if err is not None:
             return err
-        # Step 06 parser is being built in parallel and is NOT integrated
-        # here. Never silently apply or store anything from the note.
-        return JSONResponse(
-            {
-                "detail": (
-                    "notes parser not implemented in this build "
-                    "(Step 06 parser in progress); no preferences were changed"
+        # Step 06 parser (v1.0.0) integrated: parsed fields are stored as
+        # pending only — nothing is applied until POST /preferences/confirm.
+        from kindwindow.preferences import parse_note as _parse
+
+        text = payload.get("text", "") if isinstance(payload, dict) else ""
+        parsed = _parse(text)
+        if (
+            parsed["days"] is None
+            and parsed["preferred_range"] is None
+            and parsed["quiet_range"] is None
+        ):
+            return {
+                "parsed": parsed,
+                "pending_preferences": None,
+                "detail": "nothing could be parsed from the note; preferences unchanged",
+            }
+        pref = parsed["preferred_range"]
+        quiet = parsed["quiet_range"]
+        conn = db()
+        try:
+            with conn:
+                conn.execute(
+                    """INSERT INTO pending_preferences
+                       (resident_id, preferred_days, preferred_start, preferred_end,
+                        quiet_start, quiet_end, source_note, created_at_utc)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                       ON CONFLICT(resident_id) DO UPDATE SET
+                         preferred_days=excluded.preferred_days,
+                         preferred_start=excluded.preferred_start,
+                         preferred_end=excluded.preferred_end,
+                         quiet_start=excluded.quiet_start,
+                         quiet_end=excluded.quiet_end,
+                         source_note=excluded.source_note,
+                         created_at_utc=excluded.created_at_utc""",
+                    (
+                        sess["resident_id"],
+                        json.dumps(parsed["days"]) if parsed["days"] is not None else None,
+                        pref[0] if pref else None,
+                        pref[1] if pref else None,
+                        quiet[0] if quiet else None,
+                        quiet[1] if quiet else None,
+                        text,
+                        now(),
+                    ),
                 )
-            },
-            status_code=501,
-        )
+            pending = _prefs_row(
+                conn.execute(
+                    "SELECT * FROM pending_preferences WHERE resident_id = ?",
+                    (sess["resident_id"],),
+                ).fetchone()
+            )
+        finally:
+            conn.close()
+        return {
+            "parsed": parsed,
+            "pending_preferences": pending,
+            "detail": "parsed fields are pending confirmation",
+        }
 
     def _apply_or_cancel_pending(sess: dict, confirm: bool):
         conn = db()
